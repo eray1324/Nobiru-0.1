@@ -1,1 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro - NOBIRU</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="contenedor">
+
+    <h1>NOBIRU</h1>
+    <h2>Crear cuenta</h2>
+
+    <form>
+
+        <input type="email"
+               placeholder="Correo electrónico">
+
+        <br><br>
+
+        <input type="text"
+               placeholder="Nombre de usuario">
+
+        <br><br>
+
+        <input type="password"
+               placeholder="Contraseña">
+
+        <br><br>
+
+        <label>
+            <input type="checkbox">
+            Mantener sesión iniciada
+        </label>
+
+        <br><br>
+
+        <button>Registrarse</button>
+
+    </form>
+
+</div>
+
+</body>
+</html>
