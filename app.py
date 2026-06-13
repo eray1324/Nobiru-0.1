@@ -83,15 +83,53 @@ def register():
 
 
 # ---------- LOGIN ----------
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
+
+    if request.method == "POST":
+
+        username = request.form["username"]
+        password = request.form["password"]
+
+        conexion = sqlite3.connect("database/nobiru.db")
+        cursor = conexion.cursor()
+
+        cursor.execute(
+            """
+            SELECT * FROM usuarios
+            WHERE username = ? AND password = ?
+            """,
+            (username, password)
+        )
+
+        usuario = cursor.fetchone()
+
+        conexion.close()
+
+        if usuario:
+
+            session["usuario"] = username
+
+            return redirect("/dashboard")
+
+        else:
+
+            return "Usuario o contraseña incorrectos."
+
     return render_template("login.html")
 
 
 # ---------- PANEL ----------
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
+
+    if "usuario" not in session:
+        return redirect("/login")
+
+    return render_template(
+        "dashboard.html",
+        usuario=session["usuario"]
+    )
 
 
 if __name__ == "__main__":
