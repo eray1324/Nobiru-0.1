@@ -60,12 +60,12 @@ def register():
             cursor.execute(
                 """
                 INSERT INTO usuarios
-                (email, username, password, recordar)
+                (email, username, password_cifrada, recordar)
 
                 VALUES (?, ?, ?, ?)
                 """,
 
-                (email, username, password, recordar)
+                (email, username, password_cifrada, recordar)
             )
 
             conexion.commit()
@@ -91,23 +91,24 @@ def login():
 
         username = request.form["username"]
         password = request.form["password"]
+        password_cifrada = generate_password_hash(password)
 
         conexion = sqlite3.connect("database/nobiru.db")
         cursor = conexion.cursor()
 
-        cursor.execute(
-            """
-            SELECT * FROM usuarios
-            WHERE username = ? AND password = ?
-            """,
-            (username, password)
-        )
+       cursor.execute(
+    """
+    SELECT * FROM usuarios
+    WHERE username = ?
+    """,
+    (username,)
+)
 
-        usuario = cursor.fetchone()
+usuario = cursor.fetchone()
 
         conexion.close()
 
-        if usuario:
+        if usuario and check_password_hash(usuario[3], password):
 
             session["usuario"] = username
 
