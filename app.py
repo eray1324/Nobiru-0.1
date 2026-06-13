@@ -65,7 +65,7 @@ def register():
                 VALUES (?, ?, ?, ?)
                 """,
 
-                (email, username, password_cifrada, recordar)
+                (email, username, recordar)
             )
 
             conexion.commit()
