@@ -37,8 +37,48 @@ def inicio():
 
 
 # ---------- REGISTRO ----------
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
+
+    if request.method == "POST":
+
+        email = request.form["email"]
+        username = request.form["username"]
+        password = request.form["password"]
+
+        recordar = 0
+
+        if "recordar" in request.form:
+            recordar = 1
+
+        conexion = sqlite3.connect("database/nobiru.db")
+        cursor = conexion.cursor()
+
+        try:
+
+            cursor.execute(
+                """
+                INSERT INTO usuarios
+                (email, username, password, recordar)
+
+                VALUES (?, ?, ?, ?)
+                """,
+
+                (email, username, password, recordar)
+            )
+
+            conexion.commit()
+
+        except:
+
+            conexion.close()
+
+            return "Ese nombre de usuario ya existe."
+
+        conexion.close()
+
+        return redirect("/login")
+
     return render_template("register.html")
 
 
