@@ -76,6 +76,18 @@
         <p><strong>Autor:</strong> {{ material[3] }}</p>
 
         <p><strong>Fecha:</strong> {{ material[4] }}</p>
+        {% if material[5] != "" %}
+
+<a href="{{ url_for('static',
+filename='uploads/pdfs/' + material[5]) }}">
+
+    <button>
+        📥 Descargar PDF
+    </button>
+
+</a>
+
+{% endif %}
 
     </div>
 
