@@ -39,6 +39,15 @@ crear_bd()
 def inicio():
     return render_template("splash.html")
 
+# ---------- VERIFICAR SESIÓN ----------
+@app.route("/verificar")
+def verificar():
+
+    if "usuario" in session:
+        return redirect("/dashboard")
+
+    return redirect("/login")
+
 
 # ---------- REGISTRO ----------
 @app.route("/register", methods=["GET", "POST"])
