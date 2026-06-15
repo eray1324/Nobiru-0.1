@@ -149,3 +149,87 @@ p{
     font-weight:bold;
     margin-top:15px;
 }
+
+/* Fondo */
+body{
+    background: linear-gradient(90deg,#081120,#13223f);
+    color:white;
+    font-family:'Poppins',sans-serif;
+}
+
+/* Encabezado */
+.encabezado{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:30px;
+}
+
+/* Título */
+.titulo-biblioteca{
+    font-size:70px;
+    color:#FFD700;
+    font-weight:700;
+}
+
+/* Botón + */
+.boton-mas{
+    width:65px;
+    height:65px;
+    border-radius:50%;
+    background:#8a2be2;
+    color:white;
+    text-decoration:none;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:40px;
+}
+
+/* Barra de búsqueda */
+.buscador input{
+
+    width:100%;
+    max-width:700px;
+
+    padding:18px;
+
+    border:none;
+    border-radius:30px;
+
+    background:#1e2b45;
+
+    color:white;
+
+    font-size:18px;
+}
+
+/* Tarjetas */
+.card-material{
+
+    background:#16233c;
+
+    border-radius:25px;
+
+    padding:25px;
+
+    margin-top:25px;
+
+    box-shadow:0 0 15px rgba(0,0,0,.3);
+}
+
+/* Botones */
+button{
+
+    background:#8a2be2;
+
+    border:none;
+
+    color:white;
+
+    padding:12px 25px;
+
+    border-radius:25px;
+
+    cursor:pointer;
+}
