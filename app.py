@@ -47,6 +47,8 @@ def register():
         username = request.form["username"]
         password = request.form["password"]
 
+        password_cifrada = generate_password_hash(password)
+
         recordar = 0
 
         if "recordar" in request.form:
@@ -60,12 +62,11 @@ def register():
             cursor.execute(
                 """
                 INSERT INTO usuarios
-                (email, username, password_cifrada, recordar)
+                (email, username, password, recordar)
 
                 VALUES (?, ?, ?, ?)
                 """,
-
-                (email, username, recordar)
+                (email, username, password_cifrada, recordar)
             )
 
             conexion.commit()
@@ -73,7 +74,6 @@ def register():
         except:
 
             conexion.close()
-
             return "Ese nombre de usuario ya existe."
 
         conexion.close()
@@ -81,8 +81,6 @@ def register():
         return redirect("/login")
 
     return render_template("register.html")
-
-
 # ---------- LOGIN ----------
 @app.route("/login", methods=["GET", "POST"])
 def login():
