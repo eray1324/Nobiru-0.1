@@ -2,9 +2,13 @@ from flask import Flask, render_template, request, redirect, session
 import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = "nobiru_secret_key"
+UPLOAD_FOLDER = "static/uploads/pdfs"
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # Mantener sesión hasta 60 días
 app.permanent_session_lifetime = timedelta(days=60)
