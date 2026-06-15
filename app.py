@@ -114,9 +114,9 @@ def login():
 
         conexion.close()
 
-        if usuario and check_password_hash(usuario[3], password):
+if usuario and check_password_hash(usuario[3], password):
 
-         if "recordar" in request.form:
+    if "recordar" in request.form:
         session.permanent = True
     else:
         session.permanent = False
@@ -125,9 +125,9 @@ def login():
 
     return redirect("/dashboard")
 
-        else:
+else:
 
-            return "Usuario o contraseña incorrectos."
+    return "Usuario o contraseña incorrectos."
 
     return render_template("login.html")
     
