@@ -1,86 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+/* ==========================
+FONDO GENERAL
+========================== */
+
 body{
-    background: linear-gradient(135deg,#111827,#1f2937);
+    background:linear-gradient(90deg,#081120,#13223f);
     color:white;
     font-family:'Poppins',sans-serif;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
     min-height:100vh;
 }
 
+/* ==========================
+CONTENEDORES GENERALES
+========================== */
+
 .contenedor{
-
-    background:#1e1e2f;
-
     width:90%;
-    max-width:700px;
-
-    padding:50px;
-
-    border-radius:25px;
-
-    text-align:center;
-
-    box-shadow:0px 10px 40px rgba(0,0,0,.4);
+    max-width:1400px;
+    margin:auto;
+    padding:40px;
 }
 
+/* ==========================
+TÍTULOS
+========================== */
+
 h1{
-
     color:#FFD700;
-    font-size:60px;
-    letter-spacing:3px;
-
+    font-size:70px;
+    font-weight:700;
 }
 
 h2{
+    color:white;
+    font-size:35px;
+}
 
-    color:#ff9800;
-
+h3{
+    color:#FFD700;
 }
 
 p{
-
-    color:#c084fc;
-    font-size:18px;
-
-}
-.dashboard{
-    padding:40px;
-    color:white;
+    color:#d6b3ff;
+    line-height:1.7;
 }
 
-.cards{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:20px;
-    margin-top:30px;
+/* ==========================
+ENCABEZADO BIBLIOTECA
+========================== */
+
+.encabezado{
+    display:flex;
+    align-items:center;
+    gap:30px;
+    margin-bottom:50px;
 }
 
-.card{
-    background:#1e293b;
-    border-radius:20px;
-    padding:25px;
-    box-shadow:0px 4px 15px rgba(0,0,0,.3);
-    transition:0.3s;
+.titulo-biblioteca{
+    font-size:80px;
+    color:#FFD700;
+    font-weight:700;
 }
 
-.card:hover{
-    transform:translateY(-5px);
-}
+/* ==========================
+BOTÓN +
+========================== */
 
-.bronze-badge{
-    width:140px;
-    height:140px;
-    background:#8B5A2B;
+.boton-mas{
+
+    width:75px;
+    height:75px;
+
     border-radius:50%;
+
+    background:linear-gradient(135deg,#b517ff,#7b2cff);
+
+    color:white;
+
     display:flex;
     justify-content:center;
     align-items:center;
-    font-weight:bold;
-    margin-top:15px;
+
+    text-decoration:none;
+
+    font-size:45px;
+
+    transition:.3s;
 }
+
+.boton-mas:hover{
+    transform:scale(1.08);
+}
+
+/* ==========================
+BUSCADOR
+========================== */
+
+.buscador input{
+
+    width:420px;
+
+    padding:18px 25px;
+
+    border:none;
+
+    border-radius:50px;
+
+    background:#1c2a49;
+
+    color:white;
+
+    outline:none;
+
+    font-size:18px;
+}
+
+.buscador input::placeholder{
+    color:#8b94aa;
+}
+
+/* ==========================
+SUBTÍTULOS
+========================== */
+
+.subtitulo{
+
+    margin-top:40px;
+    margin-bottom:30px;
+
+    font-size:40px;
+    color:white;
+}
+
+/* ==========================
+GRID DE MATERIALES
+========================== */
+
+.contenedor-materiales{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fill,minmax(330px,1fr));
+
+    gap:30px;
+}
+
+/* ==========================
+TARJETAS
+========================== */
+
+.card-material{
+
+    background:#16233c;
+
+    padding:30px;
+
+    border-radius:30px;
+
+    box-shadow:0 0 25px rgba(0,0,0,.25);
+
+    transition:.3s;
+}
+
+.card-material:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:0 10px 35px rgba(0,0,0,.4);
+}
+
+.card-material h3{
+
+    color:#FFD700;
+
+    margin-bottom:20px;
+
+    font-size:28px;
+}
+
+/* ==========================
+BOTONES GENERALES
+========================== */
+
+button{
+
+    background:linear-gradient(135deg,#b517ff,#7b2cff);
+
+    border:none;
+
+    color:white;
+
+    padding:14px 28px;
+
+    border-radius:30px;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+    transition:.3s;
+}
+
+button:hover{
+
+    transform:scale(1.05);
+}
+
+/* ==========================
+DASHBOARD
+========================== */
 
 .contenedor-dashboard{
     display:flex;
@@ -88,208 +224,100 @@ p{
 }
 
 .sidebar{
+
     width:260px;
+
     background:#111827;
+
     padding:30px;
 }
 
 .sidebar h1{
+
     color:#FFD700;
+
+    font-size:45px;
+
     margin-bottom:40px;
 }
 
 .sidebar a{
+
     display:block;
+
     color:white;
+
     text-decoration:none;
+
     margin-bottom:20px;
+
     font-size:18px;
+
+    transition:.3s;
 }
 
 .sidebar a:hover{
-    color:#ff9800;
+
+    color:#FFD700;
 }
 
 .contenido{
+
     flex:1;
+
     padding:40px;
 }
 
+/* ==========================
+CARDS GENERALES
+========================== */
+
 .cards{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-    gap:20px;
-    margin-top:30px;
-}
-
-.card{
-    background:#1e293b;
-    padding:25px;
-    border-radius:20px;
-    box-shadow:0 4px 15px rgba(0,0,0,.3);
-    transition:0.3s;
-}
-
-.card:hover{
-    transform:translateY(-5px);
-}
-
-.insignia-card{
-    margin-top:20px;
-}
-
-.bronze-badge{
-    width:140px;
-    height:140px;
-    background:#8B5A2B;
-    border-radius:50%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-weight:bold;
-    margin-top:15px;
-}
-
-/* Fondo */
-body{
-    background: linear-gradient(90deg,#081120,#13223f);
-    color:white;
-    font-family:'Poppins',sans-serif;
-}
-
-/* Encabezado */
-.encabezado{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:30px;
-}
-
-/* Título */
-.titulo-biblioteca{
-    font-size:70px;
-    color:#FFD700;
-    font-weight:700;
-}
-
-/* Botón + */
-.boton-mas{
-    width:65px;
-    height:65px;
-    border-radius:50%;
-    background:#8a2be2;
-    color:white;
-    text-decoration:none;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:40px;
-}
-
-/* Barra de búsqueda */
-.buscador input{
-
-    width:100%;
-    max-width:700px;
-
-    padding:18px;
-
-    border:none;
-    border-radius:30px;
-
-    background:#1e2b45;
-
-    color:white;
-
-    font-size:18px;
-}
-
-/* Tarjetas */
-.card-material{
-
-    background:#16233c;
-
-    border-radius:25px;
-
-    padding:25px;
-
-    margin-top:25px;
-
-    box-shadow:0 0 15px rgba(0,0,0,.3);
-}
-
-/* Botones */
-button{
-
-    background:#8a2be2;
-
-    border:none;
-
-    color:white;
-
-    padding:12px 25px;
-
-    border-radius:25px;
-
-    cursor:pointer;
-}
-
-/* CONTENEDOR GENERAL */
-.contenedor-materiales{
 
     display:grid;
 
     grid-template-columns:
-    repeat(auto-fit, minmax(320px,1fr));
+    repeat(auto-fill,minmax(280px,1fr));
 
     gap:25px;
-
-    margin-top:30px;
-
 }
 
+.card{
 
-/* TARJETAS */
+    background:#1e293b;
 
-.card-material{
-
-    background:#16233c;
+    padding:30px;
 
     border-radius:25px;
 
-    padding:25px;
+    box-shadow:0 5px 20px rgba(0,0,0,.3);
 
-    box-shadow:0px 0px 20px rgba(0,0,0,.3);
-
-    transition:0.3s;
-
+    transition:.3s;
 }
 
+.card:hover{
 
-.card-material:hover{
-
-    transform:translateY(-8px);
-
+    transform:translateY(-6px);
 }
 
+/* ==========================
+INSIGNIA BRONCE
+========================== */
 
-/* TITULO DE LA TARJETA */
+.bronze-badge{
 
-.card-material h3{
+    width:140px;
+    height:140px;
 
-    color:#FFD700;
+    background:#8B5A2B;
 
-    margin-bottom:15px;
+    border-radius:50%;
 
-}
+    display:flex;
+    justify-content:center;
+    align-items:center;
 
+    margin-top:20px;
 
-/* SUBTITULO */
-
-.subtitulo{
-
-    margin-top:40px;
-
-    color:white;
-
+    font-weight:bold;
 }
