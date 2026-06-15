@@ -5,6 +5,7 @@ from datetime import timedelta
 
 app = Flask(__name__)
 app.secret_key = "nobiru_secret_key"
+from datetime import timedelta
 app.permanent_session_lifetime = timedelta(days=60)
 
 
@@ -110,9 +111,14 @@ def login():
 
         if usuario and check_password_hash(usuario[3], password):
 
-            session["usuario"] = username
+         if "recordar" in request.form:
+        session.permanent = True
+    else:
+        session.permanent = False
 
-            return redirect("/dashboard")
+    session["usuario"] = username
+
+    return redirect("/dashboard")
 
         else:
 
