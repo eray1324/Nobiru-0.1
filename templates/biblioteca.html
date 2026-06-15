@@ -36,7 +36,11 @@
    </div>
 
 
-    <h2>Materiales compartidos</h2>
+   <h2 class="subtitulo">
+    📚 Materiales compartidos
+</h2>
+
+<div class="contenedor-materiales">
 
 
     <!-- FEED -->
@@ -44,38 +48,35 @@
 
     <div class="card-material">
 
-        <h3>{{ material[1] }}</h3>
+<div class="card-material">
 
-        <p>{{ material[2] }}</p>
+    <h3>{{ material[1] }}</h3>
 
-        <p>
-            <strong>Autor:</strong>
-            {{ material[3] }}
-        </p>
+    <p>{{ material[2] }}</p>
 
-        <p>
-            <strong>Fecha:</strong>
-            {{ material[4] }}
-        </p>
+    <p>👤 {{ material[3] }}</p>
 
-        {% if material[5] %}
+    <p>📅 {{ material[4] }}</p>
 
-        <a href="{{ url_for('static',
-        filename='uploads/pdfs/' + material[5]) }}">
+    {% if material[5] != "" %}
 
-            <button>
+    <a href="{{ url_for('static',
+    filename='uploads/pdfs/' + material[5]) }}">
 
-                📥 Descargar PDF
+        <button>
 
-            </button>
+            📥 Descargar PDF
 
-        </a>
+        </button>
 
-        {% endif %}
+    </a>
 
-    </div>
+    {% endif %}
+
+</div>
 
     {% endfor %}
+    </div>
 
 
     <br><br>
