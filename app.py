@@ -266,9 +266,6 @@ def subir_material():
     if "usuario" not in session:
         return redirect("/login")
 
-    conexion = sqlite3.connect("database/nobiru.db")
-    cursor = conexion.cursor()
-
     if request.method == "POST":
 
         titulo = request.form["titulo"]
@@ -278,11 +275,21 @@ def subir_material():
 
         archivo_pdf = request.files["archivo"]
 
-        nombre_archivo = archivo_pdf.filename
+        nombre_archivo = ""
 
-        ruta_guardado = "static/uploads/pdfs/" + nombre_archivo
+        if archivo_pdf:
 
-        archivo_pdf.save(ruta_guardado)
+            nombre_archivo = archivo_pdf.filename
+
+            ruta_guardado = (
+                "static/uploads/pdfs/" +
+                nombre_archivo
+            )
+
+            archivo_pdf.save(ruta_guardado)
+
+        conexion = sqlite3.connect("database/nobiru.db")
+        cursor = conexion.cursor()
 
         cursor.execute(
             """
@@ -291,19 +298,21 @@ def subir_material():
 
             VALUES (?, ?, ?, ?, ?)
             """,
-            (titulo, descripcion, autor, fecha, nombre_archivo)
+            (
+                titulo,
+                descripcion,
+                autor,
+                fecha,
+                nombre_archivo
+            )
         )
 
         conexion.commit()
-
         conexion.close()
 
         return redirect("/biblioteca")
 
-    conexion.close()
-
     return render_template("subir_material.html")
-
 # ==========================
 # COMUNIDAD
 # ==========================
