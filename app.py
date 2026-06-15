@@ -43,12 +43,7 @@ def inicio():
 # ---------- VERIFICAR SESIÓN ----------
 @app.route("/verificar")
 def verificar():
-
-    if "usuario" in session:
-        return redirect("/dashboard")
-
-    return redirect("/login")
-
+    return "FUNCIONA"
 
 # ---------- REGISTRO ----------
 @app.route("/register", methods=["GET", "POST"])
