@@ -3,6 +3,7 @@ import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta
 import os
+os.makedirs("static/uploads/pdfs", exist_ok=True)
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
