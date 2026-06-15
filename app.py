@@ -39,6 +39,7 @@ crear_bd()
 def inicio():
     return render_template("splash.html")
 
+
 # ---------- VERIFICAR SESIÓN ----------
 @app.route("/verificar")
 def verificar():
