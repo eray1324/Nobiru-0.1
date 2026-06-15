@@ -81,6 +81,7 @@ def register():
         return redirect("/login")
 
     return render_template("register.html")
+    
 # ---------- LOGIN ----------
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -116,6 +117,7 @@ def login():
             return "Usuario o contraseña incorrectos."
 
     return render_template("login.html")
+    
 # ---------- PANEL ----------
 @app.route("/dashboard")
 def dashboard():
