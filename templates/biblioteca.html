@@ -12,69 +12,82 @@
 
 <body>
 
-<h1>📖 Biblioteca</h1>
+    <h1>📖 Biblioteca NOBIRU</h1>
 
-<form method="POST">
+    <form method="POST" enctype="multipart/form-data">
 
-    <input
-        type="text"
-        name="titulo"
-        placeholder="Título del material"
-        required>
+        <input
+            type="text"
+            name="titulo"
+            placeholder="Título del material"
+            required>
 
-    <br><br>
+        <br><br>
 
-    <input
-        type="text"
-        name="descripcion"
-        placeholder="Descripción">
+        <input
+            type="text"
+            name="descripcion"
+            placeholder="Descripción">
 
-    <br><br>
+        <br><br>
 
-    <input
-        type="text"
-        name="autor"
-        placeholder="Autor">
+        <input
+            type="text"
+            name="autor"
+            placeholder="Autor">
 
-    <br><br>
+        <br><br>
 
-    <input
-        type="date"
-        name="fecha">
+        <input
+            type="date"
+            name="fecha">
 
-    <br><br>
+        <br><br>
 
-    <button>Agregar material</button>
+        <label><strong>Seleccionar PDF:</strong></label>
 
-</form>
+        <br><br>
 
-<hr>
+        <input
+            type="file"
+            name="archivo"
+            accept=".pdf">
 
-<h2>Materiales guardados</h2>
+        <br><br>
 
-{% for material in materiales %}
+        <button type="submit">
+            📥 Agregar material
+        </button>
 
-<div>
+    </form>
 
-    <h3>{{ material[1] }}</h3>
+    <hr>
 
-    <p>{{ material[2] }}</p>
+    <h2>Materiales guardados</h2>
 
-    <p>Autor: {{ material[3] }}</p>
+    {% for material in materiales %}
 
-    <p>Fecha: {{ material[4] }}</p>
+    <div>
 
-</div>
+        <h3>{{ material[1] }}</h3>
 
-<hr>
+        <p>{{ material[2] }}</p>
 
-{% endfor %}
+        <p><strong>Autor:</strong> {{ material[3] }}</p>
 
-<a href="/dashboard">
+        <p><strong>Fecha:</strong> {{ material[4] }}</p>
 
-    <button>Volver al Dashboard</button>
+    </div>
 
-</a>
+    <hr>
+
+    {% endfor %}
+
+    <a href="/dashboard">
+        <button>
+            ⬅ Volver al Dashboard
+        </button>
+    </a>
 
 </body>
 </html>
