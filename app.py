@@ -191,13 +191,44 @@ def cuestionarios():
 # ==========================
 # BIBLIOTECA
 # ==========================
-@app.route("/biblioteca")
+@app.route("/biblioteca", methods=["GET", "POST"])
 def biblioteca():
 
     if "usuario" not in session:
         return redirect("/login")
 
-    return render_template("biblioteca.html")
+    conexion = sqlite3.connect("database/nobiru.db")
+    cursor = conexion.cursor()
+
+    if request.method == "POST":
+
+        titulo = request.form["titulo"]
+        descripcion = request.form["descripcion"]
+        autor = request.form["autor"]
+        fecha = request.form["fecha"]
+
+        cursor.execute(
+            """
+            INSERT INTO materiales
+            (titulo, descripcion, autor, fecha)
+
+            VALUES (?, ?, ?, ?)
+            """,
+            (titulo, descripcion, autor, fecha)
+        )
+
+        conexion.commit()
+
+    cursor.execute("SELECT * FROM materiales")
+
+    materiales = cursor.fetchall()
+
+    conexion.close()
+
+    return render_template(
+        "biblioteca.html",
+        materiales=materiales
+    )
 
 
 # ==========================
