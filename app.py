@@ -258,6 +258,53 @@ def biblioteca():
     )
 
 # ==========================
+# SUBIR MATERIAL
+# ==========================
+@app.route("/subir-material", methods=["GET", "POST"])
+def subir_material():
+
+    if "usuario" not in session:
+        return redirect("/login")
+
+    conexion = sqlite3.connect("database/nobiru.db")
+    cursor = conexion.cursor()
+
+    if request.method == "POST":
+
+        titulo = request.form["titulo"]
+        descripcion = request.form["descripcion"]
+        autor = request.form["autor"]
+        fecha = request.form["fecha"]
+
+        archivo_pdf = request.files["archivo"]
+
+        nombre_archivo = archivo_pdf.filename
+
+        ruta_guardado = "static/uploads/pdfs/" + nombre_archivo
+
+        archivo_pdf.save(ruta_guardado)
+
+        cursor.execute(
+            """
+            INSERT INTO materiales
+            (titulo, descripcion, autor, fecha, archivo)
+
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (titulo, descripcion, autor, fecha, nombre_archivo)
+        )
+
+        conexion.commit()
+
+        conexion.close()
+
+        return redirect("/biblioteca")
+
+    conexion.close()
+
+    return render_template("subir_material.html")
+
+# ==========================
 # COMUNIDAD
 # ==========================
 @app.route("/comunidad")
