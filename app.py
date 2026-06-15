@@ -1,32 +1,44 @@
 from flask import Flask, render_template, request, redirect, session
-import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import timedelta
-import os
-os.makedirs("static/uploads/pdfs", exist_ok=True)
 from werkzeug.utils import secure_filename
+from datetime import timedelta
+import psycopg2
+import os
 
 app = Flask(__name__)
 app.secret_key = "nobiru_secret_key"
-UPLOAD_FOLDER = "static/uploads/pdfs"
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-# Mantener sesión hasta 60 días
+# Mantener sesión 60 días
 app.permanent_session_lifetime = timedelta(days=60)
+
+# Carpeta de PDFs
+UPLOAD_FOLDER = "static/uploads/pdfs"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 
 # ==========================
-# CREAR BASE DE DATOS
+# CONEXIÓN A POSTGRESQL
+# ==========================
+def conectar_bd():
+    return psycopg2.connect(
+        os.environ.get("DATABASE_URL")
+    )
+
+
+# ==========================
+# CREAR TABLAS
 # ==========================
 def crear_bd():
 
-    conexion = sqlite3.connect("database/nobiru.db")
+    conexion = conectar_bd()
     cursor = conexion.cursor()
 
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS usuarios(
 
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         email TEXT NOT NULL,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
@@ -36,20 +48,20 @@ def crear_bd():
     """)
 
     cursor.execute("""
-CREATE TABLE IF NOT EXISTS materiales(
+    CREATE TABLE IF NOT EXISTS materiales(
 
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    titulo TEXT NOT NULL,
-    descripcion TEXT,
-    autor TEXT,
-    fecha TEXT,
-    archivo TEXT,
-    usuario TEXT,
-    descargas INTEGER DEFAULT 0
+        id SERIAL PRIMARY KEY,
+        titulo TEXT NOT NULL,
+        descripcion TEXT,
+        autor TEXT,
+        fecha TEXT,
+        archivo TEXT,
+        usuario TEXT,
+        descargas INTEGER DEFAULT 0
 
-)
-""")
-    
+    )
+    """)
+
     conexion.commit()
     conexion.close()
 
@@ -58,7 +70,7 @@ crear_bd()
 
 
 # ==========================
-# PÁGINA PRINCIPAL
+# INICIO
 # ==========================
 @app.route("/")
 def inicio():
@@ -66,7 +78,7 @@ def inicio():
 
 
 # ==========================
-# VERIFICAR SESIÓN
+# VERIFICAR
 # ==========================
 @app.route("/verificar")
 def verificar():
@@ -96,7 +108,7 @@ def register():
         if "recordar" in request.form:
             recordar = 1
 
-        conexion = sqlite3.connect("database/nobiru.db")
+        conexion = conectar_bd()
         cursor = conexion.cursor()
 
         try:
@@ -106,9 +118,14 @@ def register():
                 INSERT INTO usuarios
                 (email, username, password, recordar)
 
-                VALUES (?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s)
                 """,
-                (email, username, password_cifrada, recordar)
+                (
+                    email,
+                    username,
+                    password_cifrada,
+                    recordar
+                )
             )
 
             conexion.commit()
@@ -136,13 +153,13 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        conexion = sqlite3.connect("database/nobiru.db")
+        conexion = conectar_bd()
         cursor = conexion.cursor()
 
         cursor.execute(
             """
             SELECT * FROM usuarios
-            WHERE username = ?
+            WHERE username = %s
             """,
             (username,)
         )
@@ -163,7 +180,6 @@ def login():
             return redirect("/dashboard")
 
         else:
-
             return "Usuario o contraseña incorrectos."
 
     return render_template("login.html")
@@ -185,18 +201,6 @@ def dashboard():
 
 
 # ==========================
-# CUESTIONARIOS
-# ==========================
-@app.route("/cuestionarios")
-def cuestionarios():
-
-    if "usuario" not in session:
-        return redirect("/login")
-
-    return render_template("cuestionarios.html")
-
-
-# ==========================
 # BIBLIOTECA
 # ==========================
 @app.route("/biblioteca")
@@ -205,10 +209,14 @@ def biblioteca():
     if "usuario" not in session:
         return redirect("/login")
 
-    conexion = sqlite3.connect("database/nobiru.db")
+    conexion = conectar_bd()
     cursor = conexion.cursor()
 
-    cursor.execute("SELECT * FROM materiales")
+    cursor.execute("""
+        SELECT *
+        FROM materiales
+        ORDER BY id DESC
+    """)
 
     materiales = cursor.fetchall()
 
@@ -218,6 +226,8 @@ def biblioteca():
         "biblioteca.html",
         materiales=materiales
     )
+
+
 # ==========================
 # SUBIR MATERIAL
 # ==========================
@@ -240,31 +250,41 @@ def subir_material():
 
         if archivo_pdf:
 
-            nombre_archivo = archivo_pdf.filename
+            nombre_archivo = secure_filename(
+                archivo_pdf.filename
+            )
 
-            ruta_guardado = (
-                "static/uploads/pdfs/" +
+            ruta_guardado = os.path.join(
+                app.config["UPLOAD_FOLDER"],
                 nombre_archivo
             )
 
             archivo_pdf.save(ruta_guardado)
 
-        conexion = sqlite3.connect("database/nobiru.db")
+        conexion = conectar_bd()
         cursor = conexion.cursor()
 
         cursor.execute(
             """
             INSERT INTO materiales
-            (titulo, descripcion, autor, fecha, archivo)
+            (
+                titulo,
+                descripcion,
+                autor,
+                fecha,
+                archivo,
+                usuario
+            )
 
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """,
             (
                 titulo,
                 descripcion,
                 autor,
                 fecha,
-                nombre_archivo
+                nombre_archivo,
+                session["usuario"]
             )
         )
 
@@ -274,6 +294,20 @@ def subir_material():
         return redirect("/biblioteca")
 
     return render_template("subir_material.html")
+
+
+# ==========================
+# CUESTIONARIOS
+# ==========================
+@app.route("/cuestionarios")
+def cuestionarios():
+
+    if "usuario" not in session:
+        return redirect("/login")
+
+    return render_template("cuestionarios.html")
+
+
 # ==========================
 # COMUNIDAD
 # ==========================
@@ -299,7 +333,7 @@ def favoritos():
 
 
 # ==========================
-# REELS EDUCATIVOS
+# REELS
 # ==========================
 @app.route("/reels")
 def reels():
@@ -308,8 +342,10 @@ def reels():
         return redirect("/login")
 
     return render_template("reels.html")
+
+
 # ==========================
-# CERRAR SESIÓN
+# LOGOUT
 # ==========================
 @app.route("/logout")
 def logout():
