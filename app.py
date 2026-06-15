@@ -165,6 +165,64 @@ def dashboard():
 
 
 # ==========================
+# CUESTIONARIOS
+# ==========================
+@app.route("/cuestionarios")
+def cuestionarios():
+
+    if "usuario" not in session:
+        return redirect("/login")
+
+    return render_template("cuestionarios.html")
+
+
+# ==========================
+# BIBLIOTECA
+# ==========================
+@app.route("/biblioteca")
+def biblioteca():
+
+    if "usuario" not in session:
+        return redirect("/login")
+
+    return render_template("biblioteca.html")
+
+
+# ==========================
+# COMUNIDAD
+# ==========================
+@app.route("/comunidad")
+def comunidad():
+
+    if "usuario" not in session:
+        return redirect("/login")
+
+    return render_template("comunidad.html")
+
+
+# ==========================
+# FAVORITOS
+# ==========================
+@app.route("/favoritos")
+def favoritos():
+
+    if "usuario" not in session:
+        return redirect("/login")
+
+    return render_template("favoritos.html")
+
+
+# ==========================
+# REELS EDUCATIVOS
+# ==========================
+@app.route("/reels")
+def reels():
+
+    if "usuario" not in session:
+        return redirect("/login")
+
+    return render_template("reels.html")
+# ==========================
 # CERRAR SESIÓN
 # ==========================
 @app.route("/logout")
