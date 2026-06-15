@@ -212,14 +212,35 @@ def biblioteca():
         autor = request.form["autor"]
         fecha = request.form["fecha"]
 
+        archivo_pdf = request.files["archivo"]
+
+        nombre_archivo = ""
+
+        if archivo_pdf:
+
+            nombre_archivo = secure_filename(archivo_pdf.filename)
+
+            ruta_guardado = os.path.join(
+                app.config["UPLOAD_FOLDER"],
+                nombre_archivo
+            )
+
+            archivo_pdf.save(ruta_guardado)
+
         cursor.execute(
             """
             INSERT INTO materiales
-            (titulo, descripcion, autor, fecha)
+            (titulo, descripcion, autor, fecha, archivo)
 
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
             """,
-            (titulo, descripcion, autor, fecha)
+            (
+                titulo,
+                descripcion,
+                autor,
+                fecha,
+                nombre_archivo
+            )
         )
 
         conexion.commit()
