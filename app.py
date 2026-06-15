@@ -36,17 +36,19 @@ def crear_bd():
     """)
 
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS materiales(
+CREATE TABLE IF NOT EXISTS materiales(
 
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        titulo TEXT NOT NULL,
-        descripcion TEXT,
-        autor TEXT,
-        fecha TEXT,
-        archivo TEXT
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    titulo TEXT NOT NULL,
+    descripcion TEXT,
+    autor TEXT,
+    fecha TEXT,
+    archivo TEXT,
+    usuario TEXT,
+    descargas INTEGER DEFAULT 0
 
-    )
-    """)
+)
+""")
     
     conexion.commit()
     conexion.close()
