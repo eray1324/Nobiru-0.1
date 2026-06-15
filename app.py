@@ -197,7 +197,7 @@ def cuestionarios():
 # ==========================
 # BIBLIOTECA
 # ==========================
-@app.route("/biblioteca", methods=["GET", "POST"])
+@app.route("/biblioteca")
 def biblioteca():
 
     if "usuario" not in session:
@@ -205,46 +205,6 @@ def biblioteca():
 
     conexion = sqlite3.connect("database/nobiru.db")
     cursor = conexion.cursor()
-
-    if request.method == "POST":
-
-        titulo = request.form["titulo"]
-        descripcion = request.form["descripcion"]
-        autor = request.form["autor"]
-        fecha = request.form["fecha"]
-
-        archivo_pdf = request.files["archivo"]
-
-        nombre_archivo = ""
-
-        if archivo_pdf:
-
-            nombre_archivo = secure_filename(archivo_pdf.filename)
-
-            ruta_guardado = os.path.join(
-                app.config["UPLOAD_FOLDER"],
-                nombre_archivo
-            )
-
-            archivo_pdf.save(ruta_guardado)
-
-        cursor.execute(
-            """
-            INSERT INTO materiales
-            (titulo, descripcion, autor, fecha, archivo)
-
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            (
-                titulo,
-                descripcion,
-                autor,
-                fecha,
-                nombre_archivo
-            )
-        )
-
-        conexion.commit()
 
     cursor.execute("SELECT * FROM materiales")
 
@@ -256,7 +216,6 @@ def biblioteca():
         "biblioteca.html",
         materiales=materiales
     )
-
 # ==========================
 # SUBIR MATERIAL
 # ==========================
