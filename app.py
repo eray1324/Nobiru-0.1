@@ -37,7 +37,7 @@ crear_bd()
 # ---------- PÁGINA PRINCIPAL ----------
 @app.route("/")
 def inicio():
-    return render_template("index.html")
+    return render_template("splash.html")
 
 
 # ---------- REGISTRO ----------
