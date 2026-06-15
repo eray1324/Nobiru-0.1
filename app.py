@@ -218,11 +218,13 @@ def biblioteca():
             (titulo, descripcion, autor, fecha)
         )
 
-        conexion.commit()
+       conexion.commit()
+print("Material guardado correctamente")
 
-    cursor.execute("SELECT * FROM materiales")
+cursor.execute("SELECT * FROM materiales")
 
-    materiales = cursor.fetchall()
+materiales = cursor.fetchall()
+print(materiales)
 
     conexion.close()
 
