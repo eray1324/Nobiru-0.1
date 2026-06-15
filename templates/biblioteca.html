@@ -12,103 +12,82 @@
 
 <body>
 
+    <!-- ENCABEZADO -->
     <div class="encabezado">
 
-    <h1 class="titulo-biblioteca">
-        Biblioteca
-    </h1>
+        <h1 class="titulo-biblioteca">
+            Biblioteca
+        </h1>
 
-    <a href="/subir-material" class="boton-mas">
-        +
-    </a>
+        <a href="/subir-material" class="boton-mas">
+            +
+        </a>
 
-</div>
+    </div>
 
-    <form method="POST" enctype="multipart/form-data">
 
-        <input
-            type="text"
-            name="titulo"
-            placeholder="Título del material"
-            required>
-
-        <br><br>
+    <!-- BARRA DE BÚSQUEDA -->
+    <div class="buscador">
 
         <input
             type="text"
-            name="descripcion"
-            placeholder="Descripción">
+            placeholder="Buscar material...">
 
-        <br><br>
+    </div>
 
-        <input
-            type="text"
-            name="autor"
-            placeholder="Autor">
 
-        <br><br>
+    <h2>Materiales compartidos</h2>
 
-        <input
-            type="date"
-            name="fecha">
 
-        <br><br>
-
-        <label><strong>Seleccionar PDF:</strong></label>
-
-        <br><br>
-
-        <input
-            type="file"
-            name="archivo"
-            accept=".pdf">
-
-        <br><br>
-
-        <button type="submit">
-            📥 Agregar material
-        </button>
-
-    </form>
-
-    <hr>
-
-    <h2>Materiales guardados</h2>
-
+    <!-- FEED -->
     {% for material in materiales %}
 
-    <div>
+    <div class="card-material">
 
         <h3>{{ material[1] }}</h3>
 
         <p>{{ material[2] }}</p>
 
-        <p><strong>Autor:</strong> {{ material[3] }}</p>
+        <p>
+            <strong>Autor:</strong>
+            {{ material[3] }}
+        </p>
 
-        <p><strong>Fecha:</strong> {{ material[4] }}</p>
-        {% if material[5] != "" %}
+        <p>
+            <strong>Fecha:</strong>
+            {{ material[4] }}
+        </p>
 
-<a href="{{ url_for('static',
-filename='uploads/pdfs/' + material[5]) }}">
+        {% if material[5] %}
 
-    <button>
-        📥 Descargar PDF
-    </button>
+        <a href="{{ url_for('static',
+        filename='uploads/pdfs/' + material[5]) }}">
 
-</a>
+            <button>
 
-{% endif %}
+                📥 Descargar PDF
+
+            </button>
+
+        </a>
+
+        {% endif %}
 
     </div>
 
-    <hr>
-
     {% endfor %}
 
+
+    <br><br>
+
     <a href="/dashboard">
+
         <button>
+
             ⬅ Volver al Dashboard
+
         </button>
+
     </a>
 
 </body>
