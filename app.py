@@ -5,6 +5,7 @@ from datetime import timedelta
 
 app = Flask(__name__)
 app.secret_key = "nobiru_secret_key"
+app.permanent_session_lifetime = timedelta(days=60)
 
 
 # ---------- CREAR BASE DE DATOS ----------
