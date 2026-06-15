@@ -1,1 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
 
+    <meta charset="UTF-8">
+    <title>NOBIRU</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+
+        body{
+            background: linear-gradient(135deg,#0f172a,#1e293b);
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+            color:white;
+            font-family:'Poppins',sans-serif;
+        }
+
+        .pantalla{
+            text-align:center;
+        }
+
+        h1{
+            color:#FFD700;
+            font-size:60px;
+        }
+
+        .loader{
+            width:70px;
+            height:70px;
+            border:7px solid rgba(255,255,255,.2);
+            border-top:7px solid #ff9800;
+            border-radius:50%;
+            margin:auto;
+            animation:girar 1s linear infinite;
+        }
+
+        @keyframes girar{
+            100%{
+                transform:rotate(360deg);
+            }
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="pantalla">
+
+    <h1>NOBIRU</h1>
+
+    <div class="loader"></div>
+
+    <p>Cargando...</p>
+
+</div>
+
+<script>
+
+setTimeout(function(){
+
+    window.location.href="/verificar";
+
+},3000);
+
+</script>
+
+</body>
+</html>
