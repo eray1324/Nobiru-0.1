@@ -3,7 +3,7 @@
 <head>
 
     <meta charset="UTF-8">
-    <title>Dashboard - NOBIRU</title>
+    <title>NOBIRU</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,56 +14,78 @@
           href="{{ url_for('static', filename='css/style.css') }}">
 
 </head>
+
 <body>
 
-<div class="dashboard">
+<div class="contenedor-dashboard">
 
-    <h1>Bienvenido, {{ usuario }}</h1>
+    <!-- MENÚ LATERAL -->
+    <div class="sidebar">
 
-    <div class="insignia">
+        <h1>NOBIRU</h1>
 
-        <h2>🏆 Insignia actual</h2>
+        <a href="#">🏠 Inicio</a>
 
-        <div class="bronze-badge">
-            BRONCE
-        </div>
+        <a href="#">📚 Cuestionarios</a>
 
-    </div>
+        <a href="#">🎥 Reels Educativos</a>
 
-    <div class="cards">
+        <a href="#">📖 Biblioteca</a>
 
-        <div class="card">
-            <h2>📚 Cuestionarios</h2>
-            <p>Crear y resolver cuestionarios.</p>
-        </div>
+        <a href="#">👥 Comunidad</a>
 
-        <div class="card">
-            <h2>🎥 Reels Educativos</h2>
-            <p>Videos cortos para aprender.</p>
-        </div>
+        <a href="#">⭐ Favoritos</a>
 
-        <div class="card">
-            <h2>📖 Biblioteca</h2>
-            <p>PDFs, libros y documentos.</p>
-        </div>
-
-        <div class="card">
-            <h2>👥 Comunidad</h2>
-            <p>Preguntas y consejos.</p>
-        </div>
-
-        <div class="card">
-            <h2>⭐ Favoritos</h2>
-            <p>Tus materiales guardados.</p>
-        </div>
+        <a href="/logout">🚪 Cerrar sesión</a>
 
     </div>
 
-    <br>
 
-    <a href="/logout">
-        <button>Cerrar sesión</button>
-    </a>
+    <!-- CONTENIDO -->
+    <div class="contenido">
+
+        <h1>Bienvenido, {{ usuario }}</h1>
+
+        <div class="insignia-card">
+
+            <h2>🏆 Insignia actual</h2>
+
+            <div class="bronze-badge">
+                BRONCE
+            </div>
+
+        </div>
+
+        <div class="cards">
+
+            <div class="card">
+                <h2>📚 Cuestionarios</h2>
+                <p>Crea y resuelve cuestionarios.</p>
+            </div>
+
+            <div class="card">
+                <h2>🎥 Reels Educativos</h2>
+                <p>Aprende con videos cortos.</p>
+            </div>
+
+            <div class="card">
+                <h2>📖 Biblioteca</h2>
+                <p>PDFs, libros y documentos.</p>
+            </div>
+
+            <div class="card">
+                <h2>👥 Comunidad</h2>
+                <p>Comparte preguntas y consejos.</p>
+            </div>
+
+            <div class="card">
+                <h2>⭐ Favoritos</h2>
+                <p>Guarda tus recursos favoritos.</p>
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
 
