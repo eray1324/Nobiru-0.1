@@ -1,1 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
 
+    <meta charset="UTF-8">
+    <title>Subir material - NOBIRU</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+<body>
+
+<h1>📤 Compartir material</h1>
+
+<form method="POST" enctype="multipart/form-data">
+
+    <input
+        type="text"
+        name="titulo"
+        placeholder="Título del material"
+        required>
+
+    <br><br>
+
+    <input
+        type="text"
+        name="descripcion"
+        placeholder="Descripción">
+
+    <br><br>
+
+    <input
+        type="text"
+        name="autor"
+        placeholder="Autor">
+
+    <br><br>
+
+    <input
+        type="date"
+        name="fecha">
+
+    <br><br>
+
+    <label>Seleccionar PDF:</label>
+
+    <br><br>
+
+    <input
+        type="file"
+        name="archivo"
+        accept=".pdf"
+        required>
+
+    <br><br>
+
+    <button>Publicar material</button>
+
+</form>
+
+<br>
+
+<a href="/biblioteca">
+
+    <button>Volver a Biblioteca</button>
+
+</a>
+
+</body>
+</html>
