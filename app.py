@@ -218,13 +218,11 @@ def biblioteca():
             (titulo, descripcion, autor, fecha)
         )
 
-       conexion.commit()
-print("Material guardado correctamente")
+        conexion.commit()
 
-cursor.execute("SELECT * FROM materiales")
+    cursor.execute("SELECT * FROM materiales")
 
-materiales = cursor.fetchall()
-print(materiales)
+    materiales = cursor.fetchall()
 
     conexion.close()
 
@@ -232,7 +230,6 @@ print(materiales)
         "biblioteca.html",
         materiales=materiales
     )
-
 
 # ==========================
 # COMUNIDAD
