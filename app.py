@@ -89,20 +89,19 @@ def login():
 
         username = request.form["username"]
         password = request.form["password"]
-        password_cifrada = generate_password_hash(password)
 
         conexion = sqlite3.connect("database/nobiru.db")
         cursor = conexion.cursor()
 
-       cursor.execute(
-    """
-    SELECT * FROM usuarios
-    WHERE username = ?
-    """,
-    (username,)
-)
+        cursor.execute(
+            """
+            SELECT * FROM usuarios
+            WHERE username = ?
+            """,
+            (username,)
+        )
 
-usuario = cursor.fetchone()
+        usuario = cursor.fetchone()
 
         conexion.close()
 
@@ -117,8 +116,6 @@ usuario = cursor.fetchone()
             return "Usuario o contraseña incorrectos."
 
     return render_template("login.html")
-
-
 # ---------- PANEL ----------
 @app.route("/dashboard")
 def dashboard():
