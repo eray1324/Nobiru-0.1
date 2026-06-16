@@ -254,16 +254,16 @@ def subir_material():
 
         archivo_pdf = request.files["archivo"]
 
-url_pdf = ""
+        url_pdf = ""
 
-if archivo_pdf:
+        if archivo_pdf:
 
-    resultado = cloudinary.uploader.upload(
-        archivo_pdf,
-        resource_type="raw"
-    )
+            resultado = cloudinary.uploader.upload(
+                archivo_pdf,
+                resource_type="raw"
+            )
 
-    url_pdf = resultado["secure_url"]
+            url_pdf = resultado["secure_url"]
 
         conexion = conectar_bd()
         cursor = conexion.cursor()
@@ -276,8 +276,8 @@ if archivo_pdf:
                 descripcion,
                 autor,
                 fecha,
-                url_pdf,
-                session["usuario"]
+                archivo,
+                usuario
             )
 
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -287,7 +287,7 @@ if archivo_pdf:
                 descripcion,
                 autor,
                 fecha,
-                nombre_archivo,
+                url_pdf,
                 session["usuario"]
             )
         )
@@ -298,7 +298,6 @@ if archivo_pdf:
         return redirect("/biblioteca")
 
     return render_template("subir_material.html")
-
 
 # ==========================
 # CUESTIONARIOS
