@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Cuestionario - NOBIRU</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="modo-oscuro">
+    <div class="contenedor" style="max-width: 800px; margin: 40px auto; padding: 20px;">
+        <div class="encabezado" style="margin-bottom: 30px;">
+            <a href="/cuestionarios" style="color: #8b94aa; text-decoration: none;">← Volver</a>
+            <h1 style="color: white; margin-top: 10px;">Crear Nuevo Cuestionario</h1>
+            <p style="color: #8b94aa;">Diseña una evaluación para la comunidad pública.</p>
+        </div>
+
+        <form action="/crear-cuestionario" method="POST" id="form-cuestionario">
+            <div class="card" style="background: #16233c; padding: 25px; border-radius: 15px; margin-bottom: 25px;">
+                <h3 style="color: white; margin-top: 0;">Información General</h3>
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #8b94aa; display: block; margin-bottom: 5px;">Título del Cuestionario</label>
+                    <input type="text" name="titulo" placeholder="Ej. Álgebra Básica o Anatomía Humana" required style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="color: #8b94aa; display: block; margin-bottom: 5px;">Descripción corta</label>
+                    <textarea name="descripcion" placeholder="¿De qué trata este cuestionario?" rows="3" style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; box-sizing: border-box; resize: none;"></textarea>
+                </div>
+            </div>
+
+            <div id="contenedor-preguntas">
+                <div class="card pregunta-item" style="background: #16233c; padding: 25px; border-radius: 15px; margin-bottom: 25px; border-left: 4px solid #7b2cff;">
+                    <h4 style="color: white; margin-top: 0; display: flex; justify-content: space-between;">
+                        <span>Pregunta #1</span>
+                    </h4>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <input type="text" name="pregunta_texto[]" placeholder="Escribe la pregunta aquí..." required style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; box-sizing: border-box;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                        <input type="text" name="opcion_a[]" placeholder="Opción A" required style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white;">
+                        <input type="text" name="opcion_b[]" placeholder="Opción B" required style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white;">
+                        <input type="text" name="opcion_c[]" placeholder="Opción C" required style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white;">
+                        <input type="text" name="opcion_d[]" placeholder="Opción D" required style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white;">
+                    </div>
+
+                    <div>
+                        <label style="color: #4cd137; display: block; margin-bottom: 5px; font-weight: bold;">Opción Correcta:</label>
+                        <select name="correcta[]" style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white;">
+                            <option value="A">Opción A</option>
+                            <option value="B">Opción B</option>
+                            <option value="C">Opción C</option>
+                            <option value="D">Opción D</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button type="button" id="btn-agregar-pregunta" class="btn-secundario" style="flex: 1; padding: 12px; border-radius: 8px; cursor: pointer; background: #1e293b; color: white; border: 1px solid #475569;">➕ Añadir Otra Pregunta</button>
+                <button type="submit" class="btn-primario" style="flex: 1; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold;">🚀 Publicar Cuestionario</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let contadorPreguntas = 1;
+        document.getElementById('btn-agregar-pregunta').addEventListener('click', function() {
+            contadorPreguntas++;
+            const contenedor = document.getElementById('contenedor-preguntas');
+            
+            const nuevaPregunta = document.createElement('div');
+            nuevaPregunta.className = 'card pregunta-item';
+            nuevaPregunta.style = 'background: #16233c; padding: 25px; border-radius: 15px; margin-bottom: 25px; border-left: 4px solid #7b2cff;';
+            nuevaPregunta.innerHTML = `
+                <h4 style="color: white; margin-top: 0; display: flex; justify-content: space-between;">
+                    <span>Pregunta #${contadorPreguntas}</span>
+                    <button type="button" onclick="this.closest('.pregunta-item').remove()" style="background: none; border: none; color: #ff7675; cursor: pointer;">Eliminar</button>
+                </h4>
+                <div style="margin-bottom: 15px;">
+                    <input type="text" name="pregunta_texto[]" placeholder="Escribe la pregunta aquí..." required style="width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; box-sizing: border-box;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <input type="text" name="opcion_a[]" placeholder="Opción A" required style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white;">
+                    <input type="text" name="opcion_b[]" placeholder="Opción B" required style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white;">
+                    <input type="text" name="opcion_c[]" placeholder="Opción C" required style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white;">
+                    <input type="text" name="opcion_d[]" placeholder="Opción D" required style="padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white;">
+                </div>
+                <div>
+                    <label style="color: #4cd137; display: block; margin-bottom: 5px; font-weight: bold;">Opción Correcta:</label>
+                    <select name="correcta[]" style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white;">
+                        <option value="A">Opción A</option>
+                        <option value="B">Opción B</option>
+                        <option value="C">Opción C</option>
+                        <option value="D">Opción D</option>
+                    </select>
+                </div>
+            `;
+            contenedor.appendChild(nuevaPregunta);
+        });
+    </script>
+</body>
+</html>
