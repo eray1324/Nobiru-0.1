@@ -393,6 +393,7 @@ def favoritos():
 def reels():
     if "usuario" not in session:
         return redirect("/login")
+        return render_template("reels.html")
         
     conexion = conectar_bd()
     cursor = conexion.cursor()
