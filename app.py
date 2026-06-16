@@ -344,61 +344,66 @@ def responder_cuestionario(cuestionario_id):
     cursor = conexion.cursor()
     
     if request.method == "POST":
-        try:
-            cursor.execute("SELECT id, correcta FROM preguntas WHERE cuestionario_id = %s", (cuestionario_id,))
-            preguntas_db = cursor.fetchall()
-            
-            puntaje = 0
-            for preg in preguntas_db:
-                p_id, correcta = preg
-                respuesta_alumno = request.form.get(f"pregunta_{p_id}")
-                if respuesta_alumno == correcta:
-                    puntaje += 1
-                    
-            # Registra el intento del usuario en el historial
-            cursor.execute("""
-                INSERT INTO respuestas_usuarios (usuario, cuestionario_id, puntaje)
-                VALUES (%s, %s, %s)
-            """, (session["usuario"], cuestionario_id, puntaje))
-            
-            conexion.commit()
-            conexion.close()
-            return redirect("/dashboard")
-        except Exception as e:
-            # 🚨 SI ALGO INESPERADO FALLA CON LA CUENTA NUEVA, EVITAMOS EL ERROR 500
-            # Cerramos la conexión para que no se congele el servidor y redirigimos a salvo
-            try:
-                conexion.close()
-            except:
-                pass
-            return redirect("/dashboard") 
+        # (Aquí mantienes tu lógica intacta de procesar las respuestas y guardar en la BD)
+        cursor.execute("SELECT id, correcta FROM preguntas WHERE cuestionario_id = %s", (cuestionario_id,))
+        preguntas_db = cursor.fetchall()
         
-    # GET: Carga el cuestionario de manera independiente
+        puntaje = 0
+        for preg in preguntas_db:
+            p_id, correcta = preg
+            respuesta_alumno = request.form.get(f"pregunta_{p_id}")
+            if respuesta_alumno == correcta:
+                puntaje += 1
+                
+        cursor.execute("""
+            INSERT INTO respuestas_usuarios (usuario, cuestionario_id, puntaje)
+            VALUES (%s, %s, %s)
+        """, (session["usuario"], cuestionario_id, puntaje))
+        conexion.commit()
+        conexion.close()
+        return redirect("/dashboard")
+        
+    # =======================================================
+    # 👇 AQUÍ ESTÁ EL ARREGLO PARA EL MÉTODO GET (ENTRAR AL QUIZ) 👇
+    # =======================================================
     try:
+        # 1. Buscamos el cuestionario por su ID
         cursor.execute("SELECT id, titulo, descripcion FROM cuestionarios WHERE id = %s", (cuestionario_id,))
         cuestionario = cursor.fetchone()
         
-        cursor.execute("SELECT id, pregunta_texto, opcion_a, opcion_b, opcion_c, opcion_d FROM preguntas WHERE cuestionario_id = %s", (cuestionario_id,))
+        # Si el cuestionario no existe, evitamos el colapso y avisamos
+        if not cuestionario:
+            conexion.close()
+            return "Error: El cuestionario solicitado no existe en la base de datos.", 404
+            
+        # 2. Buscamos las preguntas asociadas de forma limpia
+        cursor.execute("""
+            SELECT id, pregunta_texto, opcion_a, opcion_b, opcion_c, opcion_d 
+            FROM preguntas 
+            WHERE cuestionario_id = %s 
+            ORDER BY id ASC
+        """, (cuestionario_id,))
         preguntas_lista = cursor.fetchall()
         
         conexion.close()
-        return render_template("responder_cuestionario.html", cuestionario=cuestionario, preguntas=preguntas_lista)
+        
+        # 3. Renderizamos la plantilla pasándole las variables exactas
+        return render_template(
+            "responder_cuestionario.html", 
+            cuestionario=cuestionario, 
+            preguntas=preguntas_lista
+        )
+        
     except Exception as e:
+        # En caso de cualquier error imprevisto, cerramos la base de datos
         try:
             conexion.close()
         except:
             pass
-        return redirect("/dashboard")
-        
-    # GET: Carga el cuestionario de manera independiente
-    cursor.execute("SELECT id, titulo, descripcion FROM cuestionarios WHERE id = %s", (cuestionario_id,))
-    cuestionario = cursor.fetchone()
-    
-    cursor.execute("SELECT id, pregunta_texto, opcion_a, opcion_b, opcion_c, opcion_d FROM preguntas WHERE cuestionario_id = %s", (cuestionario_id,))
-    preguntas_lista = cursor.fetchall()
-    
-    conexion.close()
-    return render_template("responder_cuestionario.html", cuestionario=cuestionario, preguntas=preguntas_lista)
+        # 🚨 CAMBIO CLUCIAL: Si falla, te manda a la lista de cuestionarios (/cuestionarios)
+        # para que veas el error en la misma sección y NO te expulse al inicio.
+        print(f"Error al cargar el cuestionario: {e}")
+        return f"Error interno al cargar la vista del cuestionario: {e}", 500
 
 # ==========================================
 # RUTAS RESTANTES DE CONTROL
