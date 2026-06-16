@@ -30,25 +30,26 @@
             <div style="display: flex; flex-direction: column; gap: 20px; max-width: 800px;">
                 
                 {% for cuestionario in cuestionarios %}
-                    <div class="card" style="display: flex; justify-content: space-between; align-items: center; background: #16233c; border-left: 5px solid #7b2cff;">
-                        <div>
-                            <h3 style="margin: 0; font-size: 22px; color: #white;">📝 {{ cuestionario[1] }}</h3>
-                            <p style="margin: 5px 0 0 0; font-size: 14px; color: #8b94aa;">
-                                Subido por: @{{ cuestionario[3] }} • {{ cuestionario[2] }}
-                            </p>
-                        </div>
-                        
-                        <a href="/responder-cuestionario/{{ cuestionario[0] }}" style="text-decoration: none;">
-                            <button class="btn-primario" style="padding: 10px 24px;">Iniciar Cuestionario ⚡</button>
-                        </a>
-                    </div>
-                {% else %}
-                    <div class="card" style="text-align: center; padding: 40px;">
-                        <p style="font-size: 18px; color: #8b94aa;">No hay cuestionarios disponibles en este momento.</p>
-                        <br>
-                        <a href="/crear-cuestionario"><button class="btn-primario">Sé el primero en crear uno</button></a>
-                    </div>
-                {% endfor %}
+<div class="card" style="display: flex; justify-content: space-between; align-items: center; background: #16233c; border-left: 5px solid #7b2cff; margin-bottom: 20px; padding: 20px; border-radius: 15px;">
+    <div>
+        <h3 style="margin: 0; font-size: 22px; color: white;">{{ cuestionario[1] }}</h3>
+        
+        <p style="margin: 5px 0 0 0; font-size: 14px; color: #8b94aa;">
+            Subido por: @{{ cuestionario[2] }} • {{ cuestionario[3] }}
+        </p>
+    </div>
+    
+    <a href="/responder-cuestionario/{{ cuestionario[0] }}" style="text-decoration: none;">
+        <button class="btn-primario" style="padding: 10px 24px;">Iniciar Cuestionario</button>
+    </a>
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: 40px;">
+    <p style="font-size: 18px; color: #8b94aa;">No hay cuestionarios disponibles en este momento.</p>
+    <br>
+    <a href="/crear-cuestionario"><button class="btn-primario">Sé el primero en crear uno</button></a>
+</div>
+{% endfor %}
                 
             </div>
         </div>
