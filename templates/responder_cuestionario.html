@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Responder Cuestionario - NOBIRU</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="modo-oscuro" style="background: #0f172a; color: white; font-family: sans-serif; padding: 20px;">
+    <div class="contenedor" style="max-width: 600px; margin: 0 auto;">
+        
+        <a href="/cuestionarios" style="color: #8b94aa; text-decoration: none;">← Volver a Evaluaciones</a>
+        
+        <h1 style="margin-top: 20px; color: #38bdf8;">{{ cuestionario[1] }}</h1>
+        <p style="color: #94a3b8; margin-bottom: 30px;">{{ cuestionario[2] }}</p>
+
+        <form action="/responder-cuestionario/{{ cuestionario[0] }}" method="POST" style="background: #16233c; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            
+            {% for preg in preguntas %}
+            <div class="pregunta-card" style="margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #233554;">
+                <p style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">{{ loop.index }}. {{ preg[1] }}</p>
+                
+                <label style="display: block; margin-bottom: 8px; cursor: pointer; background: #0f172a; padding: 10px; border-radius: 6px;">
+                    <input type="radio" name="pregunta_{{ preg[0] }}" value="A" required style="margin-right: 10px;"> {{ preg[2] }}
+                </label>
+                
+                <label style="display: block; margin-bottom: 8px; cursor: pointer; background: #0f172a; padding: 10px; border-radius: 6px;">
+                    <input type="radio" name="pregunta_{{ preg[0] }}" value="B" style="margin-right: 10px;"> {{ preg[3] }}
+                </label>
+                
+                <label style="display: block; margin-bottom: 8px; cursor: pointer; background: #0f172a; padding: 10px; border-radius: 6px;">
+                    <input type="radio" name="pregunta_{{ preg[0] }}" value="C" style="margin-right: 10px;"> {{ preg[4] }}
+                </label>
+                
+                <label style="display: block; margin-bottom: 8px; cursor: pointer; background: #0f172a; padding: 10px; border-radius: 6px;">
+                    <input type="radio" name="pregunta_{{ preg[0] }}" value="D" style="margin-right: 10px;"> {{ preg[5] }}
+                </label>
+            </div>
+            {% else %}
+            <p style="color: #8b94aa; text-align: center;">Este cuestionario no tiene preguntas registradas.</p>
+            {% endfor %}
+
+            <button type="submit" style="width: 100%; background: linear-gradient(135deg, #00b894, #00a8ff); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;">
+                ✓ Enviar Mis Respuestas
+            </button>
+        </form>
+
+    </div>
+</body>
+</html>
