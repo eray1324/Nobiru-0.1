@@ -2,17 +2,36 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Favoritos - NOBIRU</title>
+    <title>Mis Favoritos - NOBIRU</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-
-<h1>⭐ Favoritos</h1>
-
-<p>Aquí aparecerán los favoritos de NOBIRU.</p>
-
-<a href="/dashboard">
-    <button>Volver al Dashboard</button>
-</a>
-
+<body class="modo-oscuro">
+    <div class="contenedor-dashboard">
+        <div class="sidebar">
+            <h1>NOBIRU</h1>
+            <a href="/dashboard">Inicio</a>
+            <a href="/biblioteca">Biblioteca</a>
+            <a href="/comunidad">Comunidad</a>
+            <a href="/cuestionarios">Cuestionarios</a>
+            <a href="/reels">Reels</a>
+            <a href="/favoritos" class="activo">Mis Favoritos</a>
+            <a href="/logout">Cerrar Sesión</a>
+        </div>
+        
+        <div class="contenido">
+            <h2>Mis Recursos Guardados</h2>
+            <div class="contenedor-materiales">
+                {% for mat in materiales %}
+                    <div class="card-material">
+                        <h3>⭐ {{ mat[1] }}</h3>
+                        <p>{{ mat[2] }}</p>
+                        <a href="{{ mat[5] }}" target="_blank"><button class="btn-secundario">Ver PDF</button></a>
+                    </div>
+                {% empty %}
+                    <p>Aún no has guardado elementos en tus favoritos.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </body>
 </html>
