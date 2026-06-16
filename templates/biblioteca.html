@@ -1,85 +1,62 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
     <meta charset="UTF-8">
     <title>Biblioteca - NOBIRU</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
-<body>
-
-    <!-- ENCABEZADO -->
-    <div class="encabezado">
-
-        <h1 class="titulo-biblioteca">
-    Biblioteca ✨
-    </h1>
-
-        <a href="/subir-material" class="boton-mas">
-            +
-        </a>
-
+<body class="modo-oscuro">
+    <div class="contenedor-dashboard">
+        
+        <div class="sidebar">
+            <h1>NOBIRU</h1>
+            <a href="/dashboard">Inicio</a>
+            <a href="/biblioteca" class="activo">Biblioteca</a>
+            <a href="/comunidad">Comunidad</a>
+            <a href="/cuestionarios">Cuestionarios</a>
+            <a href="/reels">Reels Educativos</a>
+            <a href="/favoritos">Favoritos</a>
+            <a href="/logout">Cerrar sesión</a>
+        </div>
+        
+        <div class="contenido">
+            
+            <div class="encabezado">
+                <h1 class="titulo-biblioteca">Biblioteca</h1>
+                <a href="/subir-material" class="boton-mas" title="Compartir nuevo material">+</a>
+            </div>
+            
+            <div class="buscador" style="margin-bottom: 40px;">
+                <input type="text" placeholder="🔍 Buscar material...">
+            </div>
+            
+            <h2 class="subtitulo">Materiales compartidos</h2>
+            
+            <div class="contenedor-materiales">
+                {% for material in materiales %}
+                    <div class="card-material">
+                        <h3>📘 {{ material[1] }}</h3> <p style="margin-bottom: 15px;">{{ material[2] }}</p> <div style="font-size: 13px; color: #8b94aa; margin-bottom: 20px;">
+                            <p style="margin: 2px 0;">👤 <strong>Autor:</strong> {{ material[3] }}</p>
+                            <p style="margin: 2px 0;">📅 <strong>Fecha:</strong> {{ material[4] }}</p>
+                            <p style="margin: 2px 0; color: #a29bfe;">📤 <strong>Subido por:</strong> @{{ material[6] }}</p>
+                        </div>
+                        
+                        {% if material[5] and material[5] != "" %}
+                            <a href="{{ material[5] }}" target="_blank" style="text-decoration: none;">
+                                <button class="btn-primario" style="width: 100%;">Ver / Descargar PDF</button>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <p style="font-size: 18px; color: #8b94aa;">Aún no hay materiales en la biblioteca. ¡Sé el primero en compartir uno!</p>
+                        <br>
+                        <a href="/subir-material"><button class="btn-primario">Subir Material</button></a>
+                    </div>
+                {% endfor %}
+            </div>
+            
+        </div>
     </div>
-
-
-    <!-- BARRA DE BÚSQUEDA -->
-   <div class="buscador">
-
-    <input
-        type="text"
-        placeholder="🔍 Buscar material...">
-
-   </div>
-
-
-   <h2 class="subtitulo">
-    📚 Materiales compartidos
-</h2>
-
-<div class="contenedor-materiales">
-
-
-    <!-- FEED -->
-    {% for material in materiales %}
-
-    <div class="card-material">
-
-<div class="card-material">
-
-    <h3>{{ material[1] }}</h3>
-
-    <p>{{ material[2] }}</p>
-
-    <p>👤 {{ material[3] }}</p>
-
-    <p>📅 {{ material[4] }}</p>
-
-    {% if material[5] != "" %}
-
-   <a href="{{ material[5] }}" target="_blank">
-
-        <button>
-
-            📥 Descargar PDF
-
-        </button>
-
-    </a>
-
-    {% endif %}
-
-</div>
-
-    {% endfor %}
-    </div>
-
-
-    <br><br>
-
-
 </body>
 </html>
