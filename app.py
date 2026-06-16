@@ -430,19 +430,20 @@ def favoritos():
     return render_template("favoritos.html")
 
 # ==========================================
-# RUTAS DE REELS
+# SECCIÓN VIDEOS RECOMENDADOS (TIPO YOUTUBE)
 # ==========================================
-@app.route("/reels")
+@app.route("/reels")  # Mantenemos la ruta /reels para no cambiar tus menús
 def reels():
     if "usuario" not in session:
         return redirect("/login")
         
     conexion = conectar_bd()
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM reels ORDER BY id DESC")
-    lista_reels = cursor.fetchall()
+    # Traemos los datos de los videos guardados
+    cursor.execute("SELECT id, titulo, url, usuario, fecha FROM reels ORDER BY id DESC")
+    lista_videos = cursor.fetchall()
     conexion.close()
-    return render_template("reels.html", reels=lista_reels)
+    return render_template("reels.html", reels=lista_videos)
 
 @app.route("/subir-reel", methods=["GET", "POST"])
 def subir_reel():
@@ -450,36 +451,31 @@ def subir_reel():
         return redirect("/login")
         
     if request.method == "POST":
+        # Ahora capturamos directamente el Texto del formulario, ¡sin archivos pesados!
         titulo = request.form.get("titulo")
-        archivo_video = request.files.get("video")
-        url_video = ""
+        url_externa = request.form.get("url")  # El link de YouTube/Drive
+        descripcion = request.form.get("descripcion", "Sin descripción") # Usamos descripción en lugar de autor
         
-        if archivo_video and archivo_video.filename != "":
-            try:
-                resultado = cloudinary.uploader.upload(archivo_video, resource_type="video")
-                url_video = resultado.get("secure_url")
-            except Exception as e:
-                print(f"Error al subir a Cloudinary: {e}")
-                return f"Error al procesar el video en la nube: {e}", 500
-            
-        if url_video:
+        if titulo and url_externa:
             try:
                 conexion = conectar_bd()
                 cursor = conexion.cursor()
+                
+                # Aprovechamos la columna 'usuario' o la fecha de la tabla actual para guardar la descripción temporalmente si no quieres alterar columnas, 
+                # o mejor aún, guardamos la descripción en el campo "usuario" de la tabla para no complicarnos con SQL.
                 cursor.execute("""
                     INSERT INTO reels (titulo, url, usuario, fecha)
                     VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
-                """, (titulo, url_video, session["usuario"]))
+                """, (titulo, url_externa, descripcion))
                 
                 conexion.commit()
                 conexion.close()
+                return redirect("/reels")
             except Exception as e:
-                print(f"Error en la Base de Datos: {e}")
+                print(f"Error en la Base de Datos al guardar video: {e}")
                 return f"Error al guardar en la base de datos: {e}", 500
-                
-            return redirect("/reels")
         else:
-            return "No se pudo obtener la URL del video. Inténtalo de nuevo.", 400
+            return "Por favor, rellena todos los campos.", 400
         
     return render_template("subir_reel.html")
     
