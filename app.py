@@ -97,6 +97,15 @@ def crear_bd():
         fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS comunidad(
+        id SERIAL PRIMARY KEY,
+        usuario TEXT NOT NULL,
+        comentario TEXT NOT NULL,
+        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
     
     conexion.commit()
     conexion.close()
@@ -133,7 +142,7 @@ def register():
                 INSERT INTO usuarios (email, username, password, recordar)
                 VALUES (%s, %s, %s, %s)
             """, (email, username, password_cifrada, recordar))
-            conexion.commit() # ¡Guardado forzado!
+            conexion.commit()
             conexion.close()
             return redirect("/login")
         except Exception:
@@ -182,7 +191,6 @@ def dashboard():
     
     frase_hoy = "El aprendizaje es un tesoro que seguirá a su dueño a todas partes."
     
-    # Sistema de rangos rápido
     if cuestionarios_completados >= 10:
         rango, emoji, estilo_css = "Oro", "🏅", "background: #f1c40f; color: #2c3e50;"
     elif cuestionarios_completados >= 5:
@@ -199,7 +207,7 @@ def dashboard():
     )
 
 # ==========================================
-# SECCIÓN BIBLIOTECA (¡FIX DE GUARDADO!)
+# SECCIÓN BIBLIOTECA
 # ==========================================
 @app.route("/biblioteca")
 def biblioteca():
@@ -239,7 +247,7 @@ def subir_material():
                 INSERT INTO materiales (titulo, descripcion, autor, fecha, archivo, usuario)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (titulo, descripcion, autor, fecha, url_pdf, session["usuario"]))
-            conexion.commit() # 🔥 CRUCIAL: Contrata el guardado en la BD cloud
+            conexion.commit()
             conexion.close()
             return redirect("/biblioteca")
         except Exception as e:
@@ -294,7 +302,7 @@ def crear_cuestionario():
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (cuestionario_id, preguntas_texto[i], opciones_a[i], opciones_b[i], opciones_c[i], opciones_d[i], correctas[i]))
             
-        conexion.commit() # 🔥 Guarda todo el cuestionario junto con sus preguntas
+        conexion.commit()
         conexion.close()
         return redirect("/cuestionarios")
     return render_template("crear_cuestionario.html")
@@ -331,7 +339,6 @@ def responder_cuestionario(cuestionario_id):
             conexion.commit()
             conexion.close()
             
-            # Muestra tu plantilla exacta de resultados
             return render_template(
                 "resultado_quiz.html", 
                 puntuacion=puntuacion, aciertos=aciertos, errores=errores
@@ -358,7 +365,7 @@ def responder_cuestionario(cuestionario_id):
         return redirect("/cuestionarios")
 
 # ==========================================
-# SECCIÓN VIDEOS (TIPO YOUTUBE - ¡MÁXIMA ESTABILIDAD!)
+# SECCIÓN VIDEOS (TIPO YOUTUBE)
 # ==========================================
 @app.route("/reels")
 def reels():
@@ -389,12 +396,38 @@ def subir_reel():
                     INSERT INTO reels (titulo, url, usuario, fecha)
                     VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
                 """, (titulo, url_externa, descripcion))
-                conexion.commit() # 🔥 Guarda el link educativo para siempre
+                conexion.commit()
                 conexion.close()
                 return redirect("/reels")
             except Exception as e:
                 return f"Error al guardar video: {e}", 500
     return render_template("subir_reel.html")
+
+# ==========================================
+# SECCIÓN COMUNIDAD (FORO DE COMENTARIOS)
+# ==========================================
+@app.route("/comunidad", methods=["GET", "POST"])
+def comunidad():
+    if "usuario" not in session:
+        return redirect("/login")
+        
+    conexion = conectar_bd()
+    cursor = conexion.cursor()
+    
+    if request.method == "POST":
+        comentario = request.form.get("comentario")
+        if comentario:
+            cursor.execute("""
+                INSERT INTO comunidad (usuario, comentario)
+                VALUES (%s, %s)
+            """, (session["usuario"], comentario))
+            conexion.commit()
+            
+    cursor.execute("SELECT usuario, comentario, fecha FROM comunidad ORDER BY id DESC")
+    lista_comentarios = cursor.fetchall()
+    conexion.close()
+    
+    return render_template("comunidad.html", comentarios=lista_comentarios)
     
 @app.route("/logout")
 def logout():
