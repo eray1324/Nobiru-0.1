@@ -414,19 +414,38 @@ def subir_reel():
         archivo_video = request.files.get("video")
         url_video = ""
         
-        if archivo_video:
-            resultado = cloudinary.uploader.upload(archivo_video, resource_type="video")
-            url_video = resultado.get("secure_url")
+        # 1. Validamos que el archivo realmente haya sido seleccionado por el usuario
+        if archivo_video and archivo_video.filename != "":
+            try:
+                # Subida optimizada a Cloudinary especificando que es un archivo de video
+                resultado = cloudinary.uploader.upload(archivo_video, resource_type="video")
+                url_video = resultado.get("secure_url")
+            except Exception as e:
+                # Si Cloudinary falla (por credenciales o tamaño), esto evita que la app muera
+                print(f"Error al subir a Cloudinary: {e}")
+                return f"Error al procesar el video en la nube: {e}", 500
             
-        conexion = conectar_bd()
-        cursor = conexion.cursor()
-        cursor.execute("""
-            INSERT INTO reels (titulo, url, usuario, fecha)
-            VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
-        """, (titulo, url_video, session["usuario"]))
-        conexion.commit()
-        conexion.close()
-        return redirect("/reels")
+        # 2. Guardado seguro en la Base de Datos especificando las columnas exactas
+        if url_video:
+            try:
+                conexion = conectar_bd()
+                cursor = conexion.cursor()
+                
+                # Especificamos explícitamente el orden de las columnas de tu tabla
+                cursor.execute("""
+                    INSERT INTO reels (titulo, url, usuario, fecha)
+                    VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
+                """, (titulo, url_video, session["usuario"]))
+                
+                conexion.commit()
+                conexion.close()
+            except Exception as e:
+                print(f"Error en la Base de Datos: {e}")
+                return f"Error al guardar en la base de datos: {e}", 500
+                
+            return redirect("/reels")
+        else:
+            return "No se pudo obtener la URL del video. Inténtalo de nuevo.", 400
         
     return render_template("subir_reel.html")
     
