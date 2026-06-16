@@ -10,7 +10,7 @@ import cloudinary.uploader
 app = Flask(__name__)
 app.secret_key = "nobiru_secret_key"
 
-# 2. Configuración unificada de Cloudinary (Corregida sin paréntesis huérfanos)
+# 2. Configuración unificada de Cloudinary
 cloudinary.config(
     cloud_name="Root",
     api_key="974437519682479",
@@ -187,7 +187,6 @@ def dashboard():
     conexion = conectar_bd()
     cursor = conexion.cursor()
     
-    # Aseguramos que si la cuenta es nueva devuelva 0 de forma segura en vez de None
     cursor.execute("SELECT COUNT(*) FROM respuestas_usuarios WHERE usuario = %s", (username,))
     resultado_cuestionarios = cursor.fetchone()
     cuestionarios_completados = resultado_cuestionarios[0] if resultado_cuestionarios else 0
@@ -233,7 +232,7 @@ def dashboard():
     )
 
 # ==========================================
-# SECCIÓN BIBLIOTECA (BLINDADA CONTRA ERRORES 500)
+# SECCIÓN BIBLIOTECA
 # ==========================================
 @app.route("/biblioteca")
 def biblioteca():
@@ -347,7 +346,7 @@ def responder_cuestionario(cuestionario_id):
     conexion = conectar_bd()
     cursor = conexion.cursor()
     
-   if request.method == "POST":
+    if request.method == "POST":
         try:
             cursor.execute("SELECT id, correcta FROM preguntas WHERE cuestionario_id = %s", (cuestionario_id,))
             preguntas_db = cursor.fetchall()
@@ -361,11 +360,9 @@ def responder_cuestionario(cuestionario_id):
                 if respuesta_alumno == correcta:
                     aciertos += 1
             
-            # 📊 CALCULAMOS LOS DATOS QUE QUIERES MOSTRAR
             errores = total_preguntas - aciertos
             puntuacion = int((aciertos / total_preguntas) * 100) if total_preguntas > 0 else 0
                 
-            # Registramos el intento en la base de datos
             cursor.execute("""
                 INSERT INTO respuestas_usuarios (usuario, cuestionario_id, puntaje)
                 VALUES (%s, %s, %s)
@@ -373,9 +370,9 @@ def responder_cuestionario(cuestionario_id):
             conexion.commit()
             conexion.close()
             
-            # 👇 EN LUGAR DE REDIRIGIR, LE MANDAMOS LOS RESULTADOS AL HTML 👇
+            # Renderiza tu archivo existente con los datos calculados
             return render_template(
-                "resultado_quiz.html", 
+                "responder_quiz.html", 
                 puntuacion=puntuacion, 
                 aciertos=aciertos, 
                 errores=errores
@@ -388,7 +385,7 @@ def responder_cuestionario(cuestionario_id):
             print(f"Error al guardar respuestas: {e}")
             return redirect("/cuestionarios")
         
-    # MÉTODO GET: Carga el cuestionario dinámico de forma segura
+    # MÉTODO GET: Carga el cuestionario de forma independiente
     try:
         cursor.execute("SELECT id, titulo, descripcion FROM cuestionarios WHERE id = %s", (cuestionario_id,))
         cuestionario = cursor.fetchone()
@@ -407,7 +404,6 @@ def responder_cuestionario(cuestionario_id):
         
         conexion.close()
         
-        # Apunta exactamente al archivo nuevo que creamos juntos
         return render_template("responder_cuestionario.html", cuestionario=cuestionario, preguntas=preguntas_lista)
         
     except Exception as e:
@@ -434,7 +430,7 @@ def favoritos():
     return render_template("favoritos.html")
 
 # ==========================================
-# RUTAS DE REELS (TOTALMENTE FUNCIONALES)
+# RUTAS DE REELS
 # ==========================================
 @app.route("/reels")
 def reels():
