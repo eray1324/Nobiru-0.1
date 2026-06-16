@@ -7,6 +7,14 @@ import os
 
 app = Flask(__name__)
 app.secret_key = "nobiru_secret_key"
+import cloudinary
+import cloudinary.uploader
+
+cloudinary.config(
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET")
+)
 
 # Mantener sesión 60 días
 app.permanent_session_lifetime = timedelta(days=60)
