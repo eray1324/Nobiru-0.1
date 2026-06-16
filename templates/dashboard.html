@@ -1,93 +1,77 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
     <meta charset="UTF-8">
-    <title>NOBIRU</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
+    <title>Inicio - NOBIRU</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
-<body>
-
-<div class="contenedor-dashboard">
-
-    <!-- MENÚ LATERAL -->
-    <div class="sidebar">
-
-        <h1>NOBIRU</h1>
-
-        <a href="#">🏠 Inicio</a>
-
-        <a href="/cuestionarios">📚 Cuestionarios</a>
-
-        <a href="/reels">🎥 Reels Educativos</a>
-
-        <a href="/biblioteca">📖 Biblioteca</a>
-
-        <a href="/comunidad">👥 Comunidad</a>
-
-        <a href="/favoritos">⭐ Favoritos</a>
-
-        <a href="/logout">🚪 Cerrar sesión</a>
-
-    </div>
-
-
-    <!-- CONTENIDO -->
-    <div class="contenido">
-
-        <h1>Bienvenido, {{ usuario }}</h1>
-
-        <div class="insignia-card">
-
-            <h2>🏆 Insignia actual</h2>
-
-            <div class="bronze-badge">
-                BRONCE
-            </div>
-
+<body class="modo-oscuro">
+    <div class="contenedor-dashboard">
+        
+        <div class="sidebar">
+            <h1>NOBIRU</h1>
+            <a href="/dashboard" class="activo">Inicio</a>
+            <a href="/biblioteca">Biblioteca</a>
+            <a href="/comunidad">Comunidad</a>
+            <a href="/cuestionarios">Cuestionarios</a>
+            <a href="/reels">Reels</a>
+            <a href="/favoritos">Mis Favoritos</a>
+            <a href="/logout">Cerrar Sesión</a>
         </div>
-
-        <div class="cards">
-
-            <div class="card">
-                <h2>📚 Cuestionarios</h2>
-                <p>Crea y resuelve cuestionarios.</p>
+        
+        <div class="contenido">
+            
+            <div class="header-bienvenida">
+                <h2>Bienvenido a Nobiru, <span style="color: #FFD700;">{{ usuario }}</span></h2>
+                <p>Tu espacio para crecer y mejorar constantemente.</p>
             </div>
-
-            <div class="card">
-                <h2>🎥 Reels Educativos</h2>
-                <p>Aprende con videos cortos.</p>
+            
+            <div class="card" style="border-left: 5px solid #ff9800; background: #241d4f;">
+                <h3 style="color: #FFD700; margin-top: 0;">💡 Frase Motivadora del Día</h3>
+                <p style="font-style: italic; font-size: 18px; color: #f8fafc;">
+                    "{{ frase }}"
+                </p>
             </div>
-
-            <div class="card">
-                <h2>📖 Biblioteca</h2>
-                <p>PDFs, libros y documentos.</p>
+            
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 20px;">
+                
+                <div class="card" style="flex: 1; min-width: 250px;">
+                    <h3>📈 Tus Estadísticas</h3>
+                    <p><strong>Cuestionarios Completados:</strong> 0</p>
+                    <p><strong>Documentos Leídos:</strong> 0</p>
+                    <p><strong>Preguntas en Comunidad:</strong> 0</p>
+                </div>
+                
+                <div class="card" style="flex: 1; min-width: 250px; text-align: center;">
+                    <h3>🏆 Rango de Alumno</h3>
+                    
+                    <div style="width: 100px; height: 100px; background: #8c5233; border: 4px solid #b2bec3; border-radius: 50%; margin: 20px auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,0,0,0.5);">
+                        <span style="font-size: 40px;">🥉</span>
+                    </div>
+                    
+                    <h4 style="margin: 5px 0; color: #cd7f32;">Insignia Actual: Bronce</h4>
+                    <p style="font-size: 12px; color: #aaa;">¡Estás en el inicio de tu gran camino de aprendizaje!</p>
+                </div>
+                
             </div>
-
-            <div class="card">
-                <h2>👥 Comunidad</h2>
-                <p>Comparte preguntas y consejos.</p>
+            
+            <div class="card" style="margin-top: 20px;">
+                <h3>🗺 Niveles disponibles en Nobiru</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 13px;">
+                    <span style="background: #8c5233; padding: 5px 10px; border-radius: 20px;">🥉 Bronce</span>
+                    <span style="background: #7f8c8d; padding: 5px 10px; border-radius: 20px;">🥈 Plata</span>
+                    <span style="background: #f1c40f; color: black; padding: 5px 10px; border-radius: 20px; font-weight: bold;">🏅 Oro</span>
+                    <span style="background: #dff9fb; color: black; padding: 5px 10px; border-radius: 20px;">✨ Platino</span>
+                    <span style="background: #74b9ff; color: black; padding: 5px 10px; border-radius: 20px;">💎 Diamante</span>
+                    <span style="background: #ff7675; padding: 5px 10px; border-radius: 20px;">🔻 Rubí</span>
+                    <span style="background: #55efc4; color: black; padding: 5px 10px; border-radius: 20px;">💚 Esmeralda</span>
+                    <span style="background: #0984e3; padding: 5px 10px; border-radius: 20px;">🔷 Zafiro</span>
+                    <span style="background: #a29bfe; color: black; padding: 5px 10px; border-radius: 20px;">🔮 Amatista</span>
+                    <span style="background: #2d3436; border: 1px solid #a29bfe; padding: 5px 10px; border-radius: 20px;">🖤 Obsidiana</span>
+                </div>
             </div>
-
-            <div class="card">
-                <h2>⭐ Favoritos</h2>
-                <p>Guarda tus recursos favoritos.</p>
-            </div>
-
+            
         </div>
-
     </div>
-
-</div>
-
 </body>
 </html>
