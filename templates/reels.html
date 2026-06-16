@@ -2,28 +2,36 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reels - NOBIRU</title>
+    <title>Videos Educativos - NOBIRU</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="modo-oscuro" style="background: #0f172a; color: white; font-family: sans-serif;">
-    <div class="contenedor" style="max-width: 500px; margin: 0 auto; padding: 20px;">
+<body class="modo-oscuro" style="background: #0f172a; color: white; font-family: sans-serif; padding: 20px;">
+    <div style="max-width: 800px; margin: 0 auto;">
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h1>Reels Educativos</h1>
-            <a href="/subir-reel" style="background: #7b2cff; color: white; text-decoration: none; padding: 10px 15px; border-radius: 5px; font-weight: bold;">+ Subir</a>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h1 style="color: #38bdf8; margin: 0;">📺 Biblioteca de Videos</h1>
+            <div>
+                <a href="/dashboard" style="color: #94a3b8; text-decoration: none; margin-right: 20px;">Dashboard</a>
+                <a href="/subir-reel" style="background: #7b2cff; color: white; padding: 10px 15px; border-radius: 5px; text-decoration: none; font-weight: bold;">+ Compartir Video</a>
+            </div>
         </div>
 
-        <div class="feed-reels">
-            {% for reel in reels %}
-            <div class="card-reel" style="background: #16233c; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
-                <h3>{{ reel[1] }}</h3> <video src="{{ reel[2] }}" controls style="width: 100%; max-height: 400px; border-radius: 8px; background: black;"></video>
-                <p style="color: #8b94aa; font-size: 12px; margin-top: 8px;">Subido por: @{{ reel[3] }}</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            {% for video in reels %}
+            <div style="background: #16233c; padding: 20px; border-radius: 10px; border: 1px solid #233554; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <h3 style="margin: 0 0 10px 0; color: #fff;">{{ video[1] }}</h3>
+                    <p style="color: #94a3b8; font-size: 14px; margin: 0 0 20px 0; line-height: 1.4;">{{ video[3] }}</p>
+                </div>
+                
+                <a href="{{ video[2] }}" target="_blank" style="display: block; text-align: center; background: #e84118; color: white; padding: 10px; border-radius: 5px; text-decoration: none; font-weight: bold; font-size: 14px;">
+                    ▶ Ver Video Externo
+                </a>
             </div>
             {% else %}
-            <p style="color: #8b94aa; text-align: center;">No hay reels compartidos aún. ¡Sé el primero!</p>
+            <p style="grid-column: span 2; text-align: center; color: #8b94aa;">No hay videos recomendados todavía. ¡Sé el primero!</p>
             {% endfor %}
         </div>
-        
     </div>
 </body>
 </html>
