@@ -375,7 +375,7 @@ def responder_cuestionario(cuestionario_id):
             
             # 👇 EN LUGAR DE REDIRIGIR, LE MANDAMOS LOS RESULTADOS AL HTML 👇
             return render_template(
-                "resultado_cuestionario.html", 
+                "resultado_quiz.html", 
                 puntuacion=puntuacion, 
                 aciertos=aciertos, 
                 errores=errores
