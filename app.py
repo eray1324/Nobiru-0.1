@@ -31,17 +31,16 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 # CONEXIÓN A POSTGRESQL (Corregido)
 # ==========================
 def conectar_bd():
-    # Se pasa la URL del entorno correctamente dentro de los parámetros de conexión
     return psycopg2.connect(os.environ.get("DATABASE_URL"))
 
 # ==========================
-# CREAR TABLAS (Estructura de Datos Nobiru)
+# CREAR TABLAS (Estructura Completa para Nobiru)
 # ==========================
 def crear_bd():
     conexion = conectar_bd()
     cursor = conexion.cursor()
     
-    # 1. Tabla de Usuarios (Corregido DEFAULT 0 con número)
+    # 1. Tabla de Usuarios
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS usuarios(
         id SERIAL PRIMARY KEY,
@@ -52,7 +51,7 @@ def crear_bd():
     )
     """)
     
-    # 2. Tabla de Materiales / Biblioteca (Corregido DEFAULT 0 con número)
+    # 2. Tabla de Materiales (Biblioteca)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS materiales(
         id SERIAL PRIMARY KEY,
@@ -66,7 +65,7 @@ def crear_bd():
     )
     """)
     
-    # 3. Tabla de Cuestionarios (Cabeceras de los cuestionarios creados)
+    # 3. Tabla de Cuestionarios (Cabecera)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS cuestionarios(
         id SERIAL PRIMARY KEY,
@@ -77,7 +76,7 @@ def crear_bd():
     )
     """)
     
-    # 4. Tabla de Preguntas (Vinculadas a un cuestionario mediante llave foránea)
+    # 4. Tabla de Preguntas vinculadas a los Cuestionarios
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS preguntas(
         id SERIAL PRIMARY KEY,
@@ -91,7 +90,7 @@ def crear_bd():
     )
     """)
     
-    # 5. Tabla de Historial de Respuestas (Registra los cuestionarios resueltos por usuario)
+    # 5. Tabla de Historial de Respuestas (Para las estadísticas del Dashboard)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS respuestas_usuarios(
         id SERIAL PRIMARY KEY,
@@ -107,6 +106,60 @@ def crear_bd():
 
 crear_bd()
 
+# ==========================
+# DASHBOARD DINÁMICO CON SISTEMA DE INSIGNIAS
+# ==========================
+@app.route("/dashboard")
+def dashboard():
+    if "usuario" not in session:
+        return redirect("/login")
+        
+    username = session["usuario"]
+    conexion = conectar_bd()
+    cursor = conexion.cursor()
+    
+    # A. Contar Cuestionarios Respondidos por este alumno
+    cursor.execute("SELECT COUNT(*) FROM respuestas_usuarios WHERE usuario = %s", (username,))
+    cuestionarios_completados = cursor.fetchone()[0]
+    
+    # B. Contar Materiales que ha compartido en la biblioteca
+    cursor.execute("SELECT COUNT(*) FROM materiales WHERE usuario = %s", (username,))
+    documentos_compartidos = cursor.fetchone()[0]
+    
+    conexion.close()
+    
+    # REGLAS DEL JUEGO: Sistema de evolución de Insignias (10 Niveles)
+    if cuestionarios_completados >= 45:
+        rango, emoji, estilo_css = "Obsidiana", "🖤", "background: #2d3436; border: 4px solid #a29bfe; color: #fff;"
+    elif cuestionarios_completados >= 40:
+        rango, emoji, estilo_css = "Amatista", "🔮", "background: #6c5ce7; border: 4px solid #a29bfe; color: #fff;"
+    elif cuestionarios_completados >= 35:
+        rango, emoji, estilo_css = "Zafiro", "🔷", "background: #0984e3; border: 4px solid #74b9ff; color: #fff;"
+    elif cuestionarios_completados >= 30:
+        rango, emoji, estilo_css = "Esmeralda", "💚", "background: #00b894; border: 4px solid #55efc4; color: #fff;"
+    elif cuestionarios_completados >= 25:
+        rango, emoji, estilo_css = "Rubí", "🔻", "background: #d63031; border: 4px solid #ff7675; color: #fff;"
+    elif cuestionarios_completados >= 20:
+        rango, emoji, estilo_css = "Diamante", "💎", "background: #74b9ff; border: 4px solid #dff9fb; color: #fff;"
+    elif cuestionarios_completados >= 15:
+        rango, emoji, estilo_css = "Platino", "✨", "background: #dfe6e9; border: 4px solid #b2bec3; color: #2d3436;"
+    elif cuestionarios_completados >= 10:
+        rango, emoji, estilo_css = "Oro", "🏅", "background: #f1c40f; border: 4px solid #fff; color: #2c3e50; box-shadow: 0 0 15px #f1c40f;"
+    elif cuestionarios_completados >= 5:
+        rango, emoji, estilo_css = "Plata", "🥈", "background: #7f8c8d; border: 4px solid #dcdde1; color: #fff;"
+    else:
+        rango, emoji, estilo_css = "Bronce", "🥉", "background: #8c5233; border: 4px solid #b2bec3; color: #fff;"
+
+    # Mandamos las variables vivas al HTML
+    return render_template(
+        "dashboard.html", 
+        usuario=username,
+        cuestionarios_completados=cuestionarios_completados,
+        documentos_compartidos=documentos_compartidos,
+        rango=rango,
+        emoji=emoji,
+        estilo_css=estilo_css
+    )
 # ==========================
 # VISTAS Y RUTAS DE NAVEGACIÓN
 # ==========================
