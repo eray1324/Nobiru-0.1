@@ -414,9 +414,8 @@ def subir_reel():
         url_video = ""
         
         if archivo_video:
-            # resource_type="video" es vital para Cloudinary
             resultado = cloudinary.uploader.upload(archivo_video, resource_type="video")
-            url_video = resultado["secure_url"]
+            url_video = resultado.get("secure_url")
             
         conexion = conectar_bd()
         cursor = conexion.cursor()
@@ -429,7 +428,7 @@ def subir_reel():
         return redirect("/reels")
         
     return render_template("subir_reel.html")
-
+    
 @app.route("/logout")
 def logout():
     session.clear()
