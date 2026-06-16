@@ -7,6 +7,7 @@
 </head>
 <body class="modo-oscuro">
     <div class="contenedor-dashboard">
+        
         <div class="sidebar">
             <h1>NOBIRU</h1>
             <a href="/dashboard">Inicio</a>
@@ -20,18 +21,24 @@
         
         <div class="contenido">
             <h2>Mis Recursos Guardados</h2>
+            
             <div class="contenedor-materiales">
                 {% for mat in materiales %}
                     <div class="card-material">
-                        <h3>⭐ {{ mat[1] }}</h3>
-                        <p>{{ mat[2] }}</p>
-                        <a href="{{ mat[5] }}" target="_blank"><button class="btn-secundario">Ver PDF</button></a>
+                        <h3>⭐ {{ mat[1] }}</h3> <p>{{ mat[2] }}</p>       <a href="{{ mat[5] }}" target="_blank">
+                            <button class="btn-secundario">Ver PDF</button>
+                        </a>
                     </div>
-                {% empty %}
-                    <p>Aún no has guardado elementos en tus favoritos.</p>
+                {% else %}
+                    <div class="card" style="text-align: center; padding: 40px;">
+                        <p style="font-size: 18px; color: #8b94aa;">Aún no has guardado elementos en tus favoritos. ⭐</p>
+                        <br>
+                        <a href="/biblioteca"><button class="btn-primario">Explorar Biblioteca</button></a>
+                    </div>
                 {% endfor %}
             </div>
         </div>
+        
     </div>
 </body>
 </html>
