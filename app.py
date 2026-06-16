@@ -254,20 +254,16 @@ def subir_material():
 
         archivo_pdf = request.files["archivo"]
 
-        nombre_archivo = ""
+url_pdf = ""
 
-        if archivo_pdf:
+if archivo_pdf:
 
-            nombre_archivo = secure_filename(
-                archivo_pdf.filename
-            )
+    resultado = cloudinary.uploader.upload(
+        archivo_pdf,
+        resource_type="raw"
+    )
 
-            ruta_guardado = os.path.join(
-                app.config["UPLOAD_FOLDER"],
-                nombre_archivo
-            )
-
-            archivo_pdf.save(ruta_guardado)
+    url_pdf = resultado["secure_url"]
 
         conexion = conectar_bd()
         cursor = conexion.cursor()
@@ -280,8 +276,8 @@ def subir_material():
                 descripcion,
                 autor,
                 fecha,
-                archivo,
-                usuario
+                url_pdf,
+                session["usuario"]
             )
 
             VALUES (%s, %s, %s, %s, %s, %s)
