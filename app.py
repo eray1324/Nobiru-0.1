@@ -94,6 +94,17 @@ def crear_bd():
         fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
     """)
+
+    # Tabla de Reels / Videos cortos
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS reels (
+        id SERIAL PRIMARY KEY,
+        titulo TEXT NOT NULL,
+        url TEXT NOT NULL,
+        usuario TEXT NOT NULL,
+        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
     
     conexion.commit()
     conexion.close()
@@ -382,7 +393,42 @@ def favoritos():
 def reels():
     if "usuario" not in session:
         return redirect("/login")
-    return render_template("reels.html")
+        
+    conexion = conectar_bd()
+    cursor = conexion.cursor()
+    # Obtenemos todos los videos guardados en la BD para mostrarlos en el feed público
+    cursor.execute("SELECT * FROM reels ORDER BY id DESC")
+    lista_reels = cursor.fetchall()
+    conexion.close()
+    return render_template("reels.html", reels=lista_reels)
+
+@app.route("/subir-reel", methods=["GET", "POST"])
+def subir_reel():
+    if "usuario" not in session:
+        return redirect("/login")
+        
+    if request.method == "POST":
+        titulo = request.form.get("titulo")
+        archivo_video = request.files.get("video")
+        url_video = ""
+        
+        if archivo_video:
+            # Aquí es donde ocurre el cambio: resource_type="video" le indica a Cloudinary 
+            # que procese y optimice un archivo multimedia pesado
+            resultado = cloudinary.uploader.upload(archivo_video, resource_type="video")
+            url_video = resultado["secure_url"]
+            
+        conexion = conectar_bd()
+        cursor = conexion.cursor()
+        cursor.execute("""
+            INSERT INTO reels (titulo, url, usuario, fecha)
+            VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
+        """, (titulo, url_video, session["usuario"]))
+        conexion.commit()
+        conexion.close()
+        return redirect("/reels")
+        
+    return render_template("subir_reel.html")
 
 @app.route("/logout")
 def logout():
