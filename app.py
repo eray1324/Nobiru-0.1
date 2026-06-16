@@ -347,25 +347,39 @@ def responder_cuestionario(cuestionario_id):
     conexion = conectar_bd()
     cursor = conexion.cursor()
     
-    if request.method == "POST":
+   if request.method == "POST":
         try:
             cursor.execute("SELECT id, correcta FROM preguntas WHERE cuestionario_id = %s", (cuestionario_id,))
             preguntas_db = cursor.fetchall()
             
-            puntaje = 0
+            total_preguntas = len(preguntas_db)
+            aciertos = 0
+            
             for preg in preguntas_db:
                 p_id, correcta = preg
                 respuesta_alumno = request.form.get(f"pregunta_{p_id}")
                 if respuesta_alumno == correcta:
-                    puntaje += 1
+                    aciertos += 1
+            
+            # 📊 CALCULAMOS LOS DATOS QUE QUIERES MOSTRAR
+            errores = total_preguntas - aciertos
+            puntuacion = int((aciertos / total_preguntas) * 100) if total_preguntas > 0 else 0
                 
+            # Registramos el intento en la base de datos
             cursor.execute("""
                 INSERT INTO respuestas_usuarios (usuario, cuestionario_id, puntaje)
                 VALUES (%s, %s, %s)
-            """, (session["usuario"], cuestionario_id, puntaje))
+            """, (session["usuario"], cuestionario_id, puntuacion))
             conexion.commit()
             conexion.close()
-            return redirect("/dashboard")
+            
+            # 👇 EN LUGAR DE REDIRIGIR, LE MANDAMOS LOS RESULTADOS AL HTML 👇
+            return render_template(
+                "resultado_cuestionario.html", 
+                puntuacion=puntuacion, 
+                aciertos=aciertos, 
+                errores=errores
+            )
         except Exception as e:
             try:
                 conexion.close()
