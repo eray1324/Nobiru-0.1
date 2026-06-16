@@ -12,9 +12,9 @@ app.secret_key = "nobiru_secret_key"
 
 # 2. Configuración unificada de Cloudinary
 cloudinary.config(
-    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.environ.get("CLOUDINARY_API_KEY"),
-    api_secret=os.environ.get("CLOUDINARY_API_SECRET")
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME", "").strip(),
+    api_key=os.environ.get("CLOUDINARY_API_KEY", "").strip(),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET", "").strip()
 )
 
 # Sesión duradera por 60 días
