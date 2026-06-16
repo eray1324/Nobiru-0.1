@@ -10,7 +10,7 @@ import cloudinary.uploader
 app = Flask(__name__)
 app.secret_key = "nobiru_secret_key"
 
-# 2. Configuración unificada de Cloudinary
+# 2. Configuración unificada de Cloudinary (Corregida sin paréntesis huérfanos)
 cloudinary.config(
     cloud_name="Root",
     api_key="974437519682479",
@@ -29,7 +29,7 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 def conectar_bd():
     return psycopg2.connect(os.environ.get("DATABASE_URL"))
 
-# 4. Creación limpia de las 5 tablas sin errores SQL
+# 4. Creación limpia de las tablas sin errores SQL
 def crear_bd():
     conexion = conectar_bd()
     cursor = conexion.cursor()
@@ -59,7 +59,7 @@ def crear_bd():
     )
     """)
     
-    # Tabla de Cuestionarios (Estructura dinámica de cabecera)
+    # Tabla de Cuestionarios
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS cuestionarios(
         id SERIAL PRIMARY KEY,
@@ -70,7 +70,7 @@ def crear_bd():
     )
     """)
     
-    # Tabla de Preguntas (Corregido el paréntesis roto del PDF)
+    # Tabla de Preguntas
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS preguntas(
         id SERIAL PRIMARY KEY,
@@ -84,7 +84,7 @@ def crear_bd():
     )
     """)
     
-    # Tabla de Historial (Alimenta el Dashboard)
+    # Tabla de Historial
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS respuestas_usuarios(
         id SERIAL PRIMARY KEY,
@@ -95,7 +95,7 @@ def crear_bd():
     )
     """)
 
-    # Tabla de Reels / Videos cortos
+    # Tabla de Reels
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS reels (
         id SERIAL PRIMARY KEY,
@@ -176,7 +176,7 @@ def login():
     return render_template("login.html")
 
 # ==========================================
-# DASHBOARD REAL CON 10 RANGOS AUTOMÁTICOS
+# DASHBOARD REAL CON CONTROL DE VALORES NULOS
 # ==========================================
 @app.route("/dashboard")
 def dashboard():
@@ -187,20 +187,19 @@ def dashboard():
     conexion = conectar_bd()
     cursor = conexion.cursor()
     
-    # Consulta A: Contar cuestionarios reales completados en la BD
+    # Aseguramos que si la cuenta es nueva devuelva 0 de forma segura en vez de None
     cursor.execute("SELECT COUNT(*) FROM respuestas_usuarios WHERE usuario = %s", (username,))
-    cuestionarios_completados = cursor.fetchone()[0]
+    resultado_cuestionarios = cursor.fetchone()
+    cuestionarios_completados = resultado_cuestionarios[0] if resultado_cuestionarios else 0
     
-    # Consulta B: Contar PDFs reales compartidos en la biblioteca
     cursor.execute("SELECT COUNT(*) FROM materiales WHERE usuario = %s", (username,))
-    documentos_compartidos = cursor.fetchone()[0]
+    resultado_documentos = cursor.fetchone()
+    documentos_compartidos = resultado_documentos[0] if resultado_documentos else 0
     
     conexion.close()
     
-    # Inyectar una frase motivadora del día
     frase_hoy = "El aprendizaje es un tesoro que seguirá a su dueño a todas partes."
     
-    # Algoritmo de Rangos según participación de cuestionarios
     if cuestionarios_completados >= 45:
         rango, emoji, estilo_css = "Obsidiana", "🖤", "background: #2d3436; border: 4px solid #a29bfe; color: #fff;"
     elif cuestionarios_completados >= 40:
@@ -234,7 +233,7 @@ def dashboard():
     )
 
 # ==========================================
-# SECCIÓN BIBLIOTECA (COMPARTIR Y SUBIR)
+# SECCIÓN BIBLIOTECA (BLINDADA CONTRA ERRORES 500)
 # ==========================================
 @app.route("/biblioteca")
 def biblioteca():
@@ -253,31 +252,40 @@ def subir_material():
         return redirect("/login")
         
     if request.method == "POST":
-        titulo = request.form["titulo"]
-        descripcion = request.form["descripcion"]
-        autor = request.form["autor"]
-        fecha = request.form["fecha"]
-        archivo_pdf = request.files["archivo"]
+        titulo = request.form.get("titulo")
+        descripcion = request.form.get("descripcion")
+        autor = request.form.get("autor")
+        fecha = request.form.get("fecha")
+        archivo_pdf = request.files.get("archivo")
         url_pdf = ""
         
-        if archivo_pdf:
-            resultado = cloudinary.uploader.upload(archivo_pdf, resource_type="raw")
-            url_pdf = resultado["secure_url"]
+        if archivo_pdf and archivo_pdf.filename != "":
+            try:
+                resultado = cloudinary.uploader.upload(archivo_pdf, resource_type="raw")
+                url_pdf = resultado.get("secure_url")
+            except Exception as e:
+                print(f"Error al subir archivo a Cloudinary: {e}")
+                return f"Error al subir el documento a la nube: {e}", 500
+                
+        try:
+            conexion = conectar_bd()
+            cursor = conexion.cursor()
+            cursor.execute("""
+                INSERT INTO materiales (titulo, descripcion, autor, fecha, archivo, usuario)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (titulo, descripcion, autor, fecha, url_pdf, session["usuario"]))
+            conexion.commit()
+            conexion.close()
+        except Exception as e:
+            print(f"Error en Base de Datos Materiales: {e}")
+            return f"Error de base de datos al publicar material: {e}", 500
             
-        conexion = conectar_bd()
-        cursor = conexion.cursor()
-        cursor.execute("""
-            INSERT INTO materiales (titulo, descripcion, autor, fecha, archivo, usuario)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (titulo, descripcion, autor, fecha, url_pdf, session["usuario"]))
-        conexion.commit()
-        conexion.close()
         return redirect("/biblioteca")
         
     return render_template("subir_material.html")
 
 # ==========================================
-# CUESTIONARIOS DINÁMICOS POR TÍTULO
+# CUESTIONARIOS DINÁMICOS
 # ==========================================
 @app.route("/cuestionarios")
 def cuestionarios():
@@ -286,7 +294,6 @@ def cuestionarios():
         
     conexion = conectar_bd()
     cursor = conexion.cursor()
-    # Trae los metadatos necesarios de manera limpia y ordenada
     cursor.execute("SELECT id, titulo, creador, fecha FROM cuestionarios ORDER BY id DESC")
     lista_cuestionarios = cursor.fetchall()
     conexion.close()
@@ -307,14 +314,12 @@ def crear_cuestionario():
         conexion = conectar_bd()
         cursor = conexion.cursor()
         
-        # Guarda la cabecera del cuestionario
         cursor.execute("""
             INSERT INTO cuestionarios (titulo, descripcion, creador, fecha)
             VALUES (%s, %s, %s, %s) RETURNING id
         """, (titulo, descripcion, creador, fecha_actual))
         cuestionario_id = cursor.fetchone()[0]
         
-        # Captura las listas dinámicas enviadas desde el formulario HTML
         preguntas_texto = request.form.getlist("pregunta_texto[]")
         opciones_a = request.form.getlist("opcion_a[]")
         opciones_b = request.form.getlist("opcion_b[]")
@@ -322,7 +327,6 @@ def crear_cuestionario():
         opciones_d = request.form.getlist("opcion_d[]")
         correctas = request.form.getlist("correcta[]")
         
-        # Inserta cada pregunta vinculada al ID del cuestionario creado
         for i in range(len(preguntas_texto)):
             cursor.execute("""
                 INSERT INTO preguntas (cuestionario_id, pregunta_texto, opcion_a, opcion_b, opcion_c, opcion_d, correcta)
@@ -344,39 +348,41 @@ def responder_cuestionario(cuestionario_id):
     cursor = conexion.cursor()
     
     if request.method == "POST":
-        # (Aquí mantienes tu lógica intacta de procesar las respuestas y guardar en la BD)
-        cursor.execute("SELECT id, correcta FROM preguntas WHERE cuestionario_id = %s", (cuestionario_id,))
-        preguntas_db = cursor.fetchall()
-        
-        puntaje = 0
-        for preg in preguntas_db:
-            p_id, correcta = preg
-            respuesta_alumno = request.form.get(f"pregunta_{p_id}")
-            if respuesta_alumno == correcta:
-                puntaje += 1
+        try:
+            cursor.execute("SELECT id, correcta FROM preguntas WHERE cuestionario_id = %s", (cuestionario_id,))
+            preguntas_db = cursor.fetchall()
+            
+            puntaje = 0
+            for preg in preguntas_db:
+                p_id, correcta = preg
+                respuesta_alumno = request.form.get(f"pregunta_{p_id}")
+                if respuesta_alumno == correcta:
+                    puntaje += 1
                 
-        cursor.execute("""
-            INSERT INTO respuestas_usuarios (usuario, cuestionario_id, puntaje)
-            VALUES (%s, %s, %s)
-        """, (session["usuario"], cuestionario_id, puntaje))
-        conexion.commit()
-        conexion.close()
-        return redirect("/dashboard")
+            cursor.execute("""
+                INSERT INTO respuestas_usuarios (usuario, cuestionario_id, puntaje)
+                VALUES (%s, %s, %s)
+            """, (session["usuario"], cuestionario_id, puntaje))
+            conexion.commit()
+            conexion.close()
+            return redirect("/dashboard")
+        except Exception as e:
+            try:
+                conexion.close()
+            except:
+                pass
+            print(f"Error al guardar respuestas: {e}")
+            return redirect("/cuestionarios")
         
-    # =======================================================
-    # 👇 AQUÍ ESTÁ EL ARREGLO PARA EL MÉTODO GET (ENTRAR AL QUIZ) 👇
-    # =======================================================
+    # MÉTODO GET: Carga el cuestionario dinámico de forma segura
     try:
-        # 1. Buscamos el cuestionario por su ID
         cursor.execute("SELECT id, titulo, descripcion FROM cuestionarios WHERE id = %s", (cuestionario_id,))
         cuestionario = cursor.fetchone()
         
-        # Si el cuestionario no existe, evitamos el colapso y avisamos
         if not cuestionario:
             conexion.close()
-            return "Error: El cuestionario solicitado no existe en la base de datos.", 404
+            return redirect("/cuestionarios")
             
-        # 2. Buscamos las preguntas asociadas de forma limpia
         cursor.execute("""
             SELECT id, pregunta_texto, opcion_a, opcion_b, opcion_c, opcion_d 
             FROM preguntas 
@@ -387,23 +393,16 @@ def responder_cuestionario(cuestionario_id):
         
         conexion.close()
         
-        # 3. Renderizamos la plantilla pasándole las variables exactas
-        return render_template(
-            "responder_cuestionario.html", 
-            cuestionario=cuestionario, 
-            preguntas=preguntas_lista
-        )
+        # Apunta exactamente al archivo nuevo que creamos juntos
+        return render_template("responder_cuestionario.html", cuestionario=cuestionario, preguntas=preguntas_lista)
         
     except Exception as e:
-        # En caso de cualquier error imprevisto, cerramos la base de datos
         try:
             conexion.close()
         except:
             pass
-        # 🚨 CAMBIO CLUCIAL: Si falla, te manda a la lista de cuestionarios (/cuestionarios)
-        # para que veas el error en la misma sección y NO te expulse al inicio.
-        print(f"Error al cargar el cuestionario: {e}")
-        return f"Error interno al cargar la vista del cuestionario: {e}", 500
+        print(f"Error crítico en la vista del cuestionario: {e}")
+        return redirect("/cuestionarios")
 
 # ==========================================
 # RUTAS RESTANTES DE CONTROL
@@ -421,7 +420,7 @@ def favoritos():
     return render_template("favoritos.html")
 
 # ==========================================
-# RUTAS DE REELS (Ván ÚNICAMENTE en app.py)
+# RUTAS DE REELS (TOTALMENTE FUNCIONALES)
 # ==========================================
 @app.route("/reels")
 def reels():
@@ -445,24 +444,18 @@ def subir_reel():
         archivo_video = request.files.get("video")
         url_video = ""
         
-        # 1. Validamos que el archivo realmente haya sido seleccionado por el usuario
         if archivo_video and archivo_video.filename != "":
             try:
-                # Subida optimizada a Cloudinary especificando que es un archivo de video
                 resultado = cloudinary.uploader.upload(archivo_video, resource_type="video")
                 url_video = resultado.get("secure_url")
             except Exception as e:
-                # Si Cloudinary falla (por credenciales o tamaño), esto evita que la app muera
                 print(f"Error al subir a Cloudinary: {e}")
                 return f"Error al procesar el video en la nube: {e}", 500
             
-        # 2. Guardado seguro en la Base de Datos especificando las columnas exactas
         if url_video:
             try:
                 conexion = conectar_bd()
                 cursor = conexion.cursor()
-                
-                # Especificamos explícitamente el orden de las columnas de tu tabla
                 cursor.execute("""
                     INSERT INTO reels (titulo, url, usuario, fecha)
                     VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
