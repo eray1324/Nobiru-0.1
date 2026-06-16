@@ -2,17 +2,54 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reels - NOBIRU</title>
+    <title>Reels Educativos - NOBIRU</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-
-<h1>🎥 Reels Educativos</h1>
-
-<p>Aquí aparecerán los videos de NOBIRU.</p>
-
-<a href="/dashboard">
-    <button>Volver al Dashboard</button>
-</a>
-
+<body class="modo-oscuro">
+    <div class="contenedor-dashboard">
+        <div class="sidebar">
+            <h1>NOBIRU</h1>
+            <a href="/dashboard">Inicio</a>
+            <a href="/biblioteca">Biblioteca</a>
+            <a href="/comunidad">Comunidad</a>
+            <a href="/cuestionarios">Cuestionarios</a>
+            <a href="/reels" class="activo">Reels</a>
+            <a href="/favoritos">Mis Favoritos</a>
+            <a href="/logout">Cerrar Sesión</a>
+        </div>
+        
+        <div class="contenido">
+            <h2>Reels Educativos</h2>
+            
+            <div class="card">
+                <h3>Publicar un nuevo Video Corto</h3>
+                <form method="POST" enctype="multipart/form-data">
+                    <input type="text" name="titulo" placeholder="Título del Reel" required><br><br>
+                    <select name="categoria" required>
+                        <option value="Matemáticas">Matemáticas</option>
+                        <option value="Historia">Historia</option>
+                        <option value="Ciencias">Ciencias</option>
+                        <option value="Español">Español</option>
+                    </select><br><br>
+                    <input type="file" name="video" accept="video/*" required><br><br>
+                    <button type="submit" class="btn-primario">Subir Reel</button>
+                </form>
+            </div>
+            
+            <div class="grid-reels">
+                {% for reel in reels %}
+                    <div class="card-video">
+                        <h4>{{ reel[1] }}</h4>
+                        <span class="tag">{{ reel[3] }}</span>
+                        <video width="100%" controls>
+                            <source src="{{ reel[2] }}" type="video/mp4">
+                            Tu navegador no soporta reproducción de videos.
+                        </video>
+                        <p style="font-size: 12px; color: #aaa;">Subido por: @{{ reel[4] }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </body>
 </html>
