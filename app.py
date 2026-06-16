@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from datetime import timedelta, datetime
 import psycopg2
 import os
@@ -207,7 +208,7 @@ def dashboard():
     )
 
 # ==========================================
-# SECCIÓN BIBLIOTECA
+# SECCIÓN BIBLIOTECA (SUBIDA CORREGIDA)
 # ==========================================
 @app.route("/biblioteca")
 def biblioteca():
@@ -235,10 +236,15 @@ def subir_material():
         
         if archivo_pdf and archivo_pdf.filename != "":
             try:
+                # Intentar subir a Cloudinary de forma segura
                 resultado = cloudinary.uploader.upload(archivo_pdf, resource_type="raw")
                 url_pdf = resultado.get("secure_url")
             except Exception as e:
-                return f"Error en la nube: {e}", 500
+                print(f"Error Cloudinary: {e}")
+                # Si falla Cloudinary, lo guardamos local de respaldo para que no se trabe tu entrega
+                filename = secure_filename(archivo_pdf.filename)
+                archivo_pdf.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+                url_pdf = f"/static/uploads/pdfs/{filename}"
                 
         try:
             conexion = conectar_bd()
@@ -251,7 +257,8 @@ def subir_material():
             conexion.close()
             return redirect("/biblioteca")
         except Exception as e:
-            return f"Error al guardar material: {e}", 500
+            print(f"Error BD Materiales: {e}")
+            return f"Error al guardar material en la base de datos: {e}", 500
         
     return render_template("subir_material.html")
 
@@ -365,7 +372,7 @@ def responder_cuestionario(cuestionario_id):
         return redirect("/cuestionarios")
 
 # ==========================================
-# SECCIÓN VIDEOS (TIPO YOUTUBE)
+# SECCIÓN VIDEOS (REELS ORIGINALES O YOUTUBE)
 # ==========================================
 @app.route("/reels")
 def reels():
@@ -404,7 +411,7 @@ def subir_reel():
     return render_template("subir_reel.html")
 
 # ==========================================
-# SECCIÓN COMUNIDAD (FORO DE COMENTARIOS)
+# SECCIÓN COMUNIDAD
 # ==========================================
 @app.route("/comunidad", methods=["GET", "POST"])
 def comunidad():
@@ -428,6 +435,15 @@ def comunidad():
     conexion.close()
     
     return render_template("comunidad.html", comentarios=lista_comentarios)
+
+# ==========================================
+# SECCIÓN FAVORITOS (RESTAURADA)
+# ==========================================
+@app.route("/favoritos")
+def favoritos():
+    if "usuario" not in session:
+        return redirect("/login")
+    return render_template("favoritos.html")
     
 @app.route("/logout")
 def logout():
