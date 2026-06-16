@@ -7,36 +7,50 @@
 </head>
 <body class="modo-oscuro">
     <div class="contenedor-dashboard">
+        
         <div class="sidebar">
             <h1>NOBIRU</h1>
             <a href="/dashboard">Inicio</a>
+            <a href="/cuestionarios" class="activo">Cuestionarios</a>
+            <a href="/reels">Reels Educativos</a>
             <a href="/biblioteca">Biblioteca</a>
             <a href="/comunidad">Comunidad</a>
-            <a href="/cuestionarios" class="activo">Cuestionarios</a>
-            <a href="/reels">Reels</a>
-            <a href="/favoritos">Mis Favoritos</a>
-            <a href="/logout">Cerrar Sesión</a>
+            <a href="/favoritos">Favoritos</a>
+            <a href="/logout">Cerrar sesión</a>
         </div>
         
         <div class="contenido">
-            <h2>Ponte a prueba - Quiz de Demostración</h2>
-            <form method="POST" class="quiz-form">
-                {% for q in preguntas %}
-                    <div class="card">
-                        <h3>{{ loop.index }}. {{ q.p }}</h3>
-                        <label>
-                            <input type="radio" name="pregunta_{{ q.id }}" value="a" required> A) {{ q.a }}
-                        </label><br>
-                        <label>
-                            <input type="radio" name="pregunta_{{ q.id }}" value="b"> B) {{ q.b }}
-                        </label><br>
-                        <label>
-                            <input type="radio" name="pregunta_{{ q.id }}" value="c"> C) {{ q.c }}
-                        </label>
+            <div class="encabezado">
+                <h1 class="titulo-biblioteca">Cuestionarios</h1>
+                <a href="/crear-cuestionario" class="boton-mas" title="Crear nuevo cuestionario">+</a>
+            </div>
+            
+            <p style="margin-bottom: 40px;">Pon a prueba tus conocimientos. Selecciona el tema que prefieras para empezar el reto.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 20px; max-width: 800px;">
+                
+                {% for cuestionario in cuestionarios %}
+                    <div class="card" style="display: flex; justify-content: space-between; align-items: center; background: #16233c; border-left: 5px solid #7b2cff;">
+                        <div>
+                            <h3 style="margin: 0; font-size: 22px; color: #white;">📝 {{ cuestionario[1] }}</h3>
+                            <p style="margin: 5px 0 0 0; font-size: 14px; color: #8b94aa;">
+                                Subido por: @{{ cuestionario[3] }} • {{ cuestionario[2] }}
+                            </p>
+                        </div>
+                        
+                        <a href="/responder-cuestionario/{{ cuestionario[0] }}" style="text-decoration: none;">
+                            <button class="btn-primario" style="padding: 10px 24px;">Iniciar Cuestionario ⚡</button>
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="card" style="text-align: center; padding: 40px;">
+                        <p style="font-size: 18px; color: #8b94aa;">No hay cuestionarios disponibles en este momento.</p>
+                        <br>
+                        <a href="/crear-cuestionario"><button class="btn-primario">Sé el primero en crear uno</button></a>
                     </div>
                 {% endfor %}
-                <button type="submit" class="btn-enviar-quiz">Terminar Cuestionario</button>
-            </form>
+                
+            </div>
         </div>
     </div>
 </body>
