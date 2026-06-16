@@ -6,7 +6,7 @@ import os
 import cloudinary
 import cloudinary.uploader
 
-# 1. Inicialización correcta de la app
+# 1. Inicialización de la app
 app = Flask(__name__)
 app.secret_key = "nobiru_secret_key"
 
@@ -17,10 +17,8 @@ cloudinary.config(
     api_secret="gpl_ojcbZcjzLO9jFa2AqWdzMrU"
 )
 
-# Sesión duradera por 60 días
 app.permanent_session_lifetime = timedelta(days=60)
 
-# Carpeta temporal local para procesamiento de archivos
 UPLOAD_FOLDER = "static/uploads/pdfs"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
@@ -29,12 +27,11 @@ app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 def conectar_bd():
     return psycopg2.connect(os.environ.get("DATABASE_URL"))
 
-# 4. Creación limpia de las tablas sin errores SQL
+# 4. Creación limpia de las tablas
 def crear_bd():
     conexion = conectar_bd()
     cursor = conexion.cursor()
     
-    # Tabla de Usuarios
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS usuarios(
         id SERIAL PRIMARY KEY,
@@ -45,7 +42,6 @@ def crear_bd():
     )
     """)
     
-    # Tabla de Biblioteca / Materiales
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS materiales(
         id SERIAL PRIMARY KEY,
@@ -59,7 +55,6 @@ def crear_bd():
     )
     """)
     
-    # Tabla de Cuestionarios
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS cuestionarios(
         id SERIAL PRIMARY KEY,
@@ -70,7 +65,6 @@ def crear_bd():
     )
     """)
     
-    # Tabla de Preguntas
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS preguntas(
         id SERIAL PRIMARY KEY,
@@ -84,7 +78,6 @@ def crear_bd():
     )
     """)
     
-    # Tabla de Historial
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS respuestas_usuarios(
         id SERIAL PRIMARY KEY,
@@ -95,7 +88,6 @@ def crear_bd():
     )
     """)
 
-    # Tabla de Reels
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS reels (
         id SERIAL PRIMARY KEY,
@@ -109,11 +101,10 @@ def crear_bd():
     conexion.commit()
     conexion.close()
 
-# Ejecutar inicializador de tablas
 crear_bd()
 
 # ==========================================
-# RUTAS DE AUTENTICACIÓN Y ENTRADA
+# RUTAS DE AUTENTICACIÓN
 # ==========================================
 
 @app.route("/")
@@ -133,7 +124,6 @@ def register():
         username = request.form["username"]
         password = request.form["password"]
         password_cifrada = generate_password_hash(password)
-        
         recordar = 1 if "recordar" in request.form else 0
         
         conexion = conectar_bd()
@@ -143,13 +133,12 @@ def register():
                 INSERT INTO usuarios (email, username, password, recordar)
                 VALUES (%s, %s, %s, %s)
             """, (email, username, password_cifrada, recordar))
-            conexion.commit()
+            conexion.commit() # ¡Guardado forzado!
+            conexion.close()
+            return redirect("/login")
         except Exception:
             conexion.close()
             return "Ese nombre de usuario ya existe."
-            
-        conexion.close()
-        return redirect("/login")
     return render_template("register.html")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -165,10 +154,7 @@ def login():
         conexion.close()
         
         if usuario and check_password_hash(usuario[3], password):
-            if "recordar" in request.form:
-                session.permanent = True
-            else:
-                session.permanent = False
+            session.permanent = "recordar" in request.form
             session["usuario"] = username
             return redirect("/dashboard")
         else:
@@ -176,7 +162,7 @@ def login():
     return render_template("login.html")
 
 # ==========================================
-# DASHBOARD REAL CON CONTROL DE VALORES NULOS
+# DASHBOARD
 # ==========================================
 @app.route("/dashboard")
 def dashboard():
@@ -188,51 +174,32 @@ def dashboard():
     cursor = conexion.cursor()
     
     cursor.execute("SELECT COUNT(*) FROM respuestas_usuarios WHERE usuario = %s", (username,))
-    resultado_cuestionarios = cursor.fetchone()
-    cuestionarios_completados = resultado_cuestionarios[0] if resultado_cuestionarios else 0
+    cuestionarios_completados = cursor.fetchone()[0]
     
     cursor.execute("SELECT COUNT(*) FROM materiales WHERE usuario = %s", (username,))
-    resultado_documentos = cursor.fetchone()
-    documentos_compartidos = resultado_documentos[0] if resultado_documentos else 0
-    
+    documentos_compartidos = cursor.fetchone()[0]
     conexion.close()
     
     frase_hoy = "El aprendizaje es un tesoro que seguirá a su dueño a todas partes."
     
-    if cuestionarios_completados >= 45:
-        rango, emoji, estilo_css = "Obsidiana", "🖤", "background: #2d3436; border: 4px solid #a29bfe; color: #fff;"
-    elif cuestionarios_completados >= 40:
-        rango, emoji, estilo_css = "Amatista", "🔮", "background: #6c5ce7; border: 4px solid #a29bfe; color: #fff;"
-    elif cuestionarios_completados >= 35:
-        rango, emoji, estilo_css = "Zafiro", "🔷", "background: #0984e3; border: 4px solid #74b9ff; color: #fff;"
-    elif cuestionarios_completados >= 30:
-        rango, emoji, estilo_css = "Esmeralda", "💚", "background: #00b894; border: 4px solid #55efc4; color: #fff;"
-    elif cuestionarios_completados >= 25:
-        rango, emoji, estilo_css = "Rubí", "🔻", "background: #d63031; border: 4px solid #ff7675; color: #fff;"
-    elif cuestionarios_completados >= 20:
-        rango, emoji, estilo_css = "Diamante", "💎", "background: #74b9ff; border: 4px solid #dff9fb; color: #fff;"
-    elif cuestionarios_completados >= 15:
-        rango, emoji, estilo_css = "Platino", "✨", "background: #dfe6e9; border: 4px solid #b2bec3; color: #2d3436;"
-    elif cuestionarios_completados >= 10:
-        rango, emoji, estilo_css = "Oro", "🏅", "background: #f1c40f; border: 4px solid #fff; color: #2c3e50; box-shadow: 0 0 15px #f1c40f;"
+    # Sistema de rangos rápido
+    if cuestionarios_completados >= 10:
+        rango, emoji, estilo_css = "Oro", "🏅", "background: #f1c40f; color: #2c3e50;"
     elif cuestionarios_completados >= 5:
-        rango, emoji, estilo_css = "Plata", "🥈", "background: #7f8c8d; border: 4px solid #dcdde1; color: #fff;"
+        rango, emoji, estilo_css = "Plata", "🥈", "background: #7f8c8d; color: #fff;"
     else:
-        rango, emoji, estilo_css = "Bronce", "🥉", "background: #8c5233; border: 4px solid #b2bec3; color: #fff;"
+        rango, emoji, estilo_css = "Bronce", "🥉", "background: #8c5233; color: #fff;"
 
     return render_template(
         "dashboard.html",
-        usuario=username,
-        frase=frase_hoy,
+        usuario=username, frase=frase_hoy,
         cuestionarios_completados=cuestionarios_completados,
         documentos_compartidos=documentos_compartidos,
-        rango=rango,
-        emoji=emoji,
-        estilo_css=estilo_css
+        rango=rango, emoji=emoji, estilo_css=estilo_css
     )
 
 # ==========================================
-# SECCIÓN BIBLIOTECA
+# SECCIÓN BIBLIOTECA (¡FIX DE GUARDADO!)
 # ==========================================
 @app.route("/biblioteca")
 def biblioteca():
@@ -263,8 +230,7 @@ def subir_material():
                 resultado = cloudinary.uploader.upload(archivo_pdf, resource_type="raw")
                 url_pdf = resultado.get("secure_url")
             except Exception as e:
-                print(f"Error al subir archivo a Cloudinary: {e}")
-                return f"Error al subir el documento a la nube: {e}", 500
+                return f"Error en la nube: {e}", 500
                 
         try:
             conexion = conectar_bd()
@@ -273,30 +239,26 @@ def subir_material():
                 INSERT INTO materiales (titulo, descripcion, autor, fecha, archivo, usuario)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (titulo, descripcion, autor, fecha, url_pdf, session["usuario"]))
-            conexion.commit()
+            conexion.commit() # 🔥 CRUCIAL: Contrata el guardado en la BD cloud
             conexion.close()
+            return redirect("/biblioteca")
         except Exception as e:
-            print(f"Error en Base de Datos Materiales: {e}")
-            return f"Error de base de datos al publicar material: {e}", 500
-            
-        return redirect("/biblioteca")
+            return f"Error al guardar material: {e}", 500
         
     return render_template("subir_material.html")
 
 # ==========================================
-# CUESTIONARIOS DINÁMICOS
+# CUESTIONARIOS Y EVALUACIONES
 # ==========================================
 @app.route("/cuestionarios")
 def cuestionarios():
     if "usuario" not in session:
         return redirect("/login")
-        
     conexion = conectar_bd()
     cursor = conexion.cursor()
     cursor.execute("SELECT id, titulo, creador, fecha FROM cuestionarios ORDER BY id DESC")
     lista_cuestionarios = cursor.fetchall()
     conexion.close()
-    
     return render_template("cuestionarios.html", cuestionarios=lista_cuestionarios)
 
 @app.route("/crear-cuestionario", methods=["GET", "POST"])
@@ -332,10 +294,9 @@ def crear_cuestionario():
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (cuestionario_id, preguntas_texto[i], opciones_a[i], opciones_b[i], opciones_c[i], opciones_d[i], correctas[i]))
             
-        conexion.commit()
+        conexion.commit() # 🔥 Guarda todo el cuestionario junto con sus preguntas
         conexion.close()
         return redirect("/cuestionarios")
-        
     return render_template("crear_cuestionario.html")
 
 @app.route("/responder-cuestionario/<int:cuestionario_id>", methods=["GET", "POST"])
@@ -370,76 +331,41 @@ def responder_cuestionario(cuestionario_id):
             conexion.commit()
             conexion.close()
             
-            # Renderiza tu archivo existente con los datos calculados
+            # Muestra tu plantilla exacta de resultados
             return render_template(
                 "resultado_quiz.html", 
-                puntuacion=puntuacion, 
-                aciertos=aciertos, 
-                errores=errores
+                puntuacion=puntuacion, aciertos=aciertos, errores=errores
             )
         except Exception as e:
-            try:
-                conexion.close()
-            except:
-                pass
-            print(f"Error al guardar respuestas: {e}")
+            conexion.close()
             return redirect("/cuestionarios")
         
-    # MÉTODO GET: Carga el cuestionario de forma independiente
+    # GET
     try:
         cursor.execute("SELECT id, titulo, descripcion FROM cuestionarios WHERE id = %s", (cuestionario_id,))
         cuestionario = cursor.fetchone()
         
-        if not cuestionario:
-            conexion.close()
-            return redirect("/cuestionarios")
-            
         cursor.execute("""
             SELECT id, pregunta_texto, opcion_a, opcion_b, opcion_c, opcion_d 
-            FROM preguntas 
-            WHERE cuestionario_id = %s 
-            ORDER BY id ASC
+            FROM preguntas WHERE cuestionario_id = %s ORDER BY id ASC
         """, (cuestionario_id,))
         preguntas_lista = cursor.fetchall()
-        
         conexion.close()
         
-        return render_template("responder_cuestionario.html", cuestionario=cuestionario, preguntas=preguntas_lista)
-        
-    except Exception as e:
-        try:
-            conexion.close()
-        except:
-            pass
-        print(f"Error crítico en la vista del cuestionario: {e}")
+        return render_template("responder_quiz.html", cuestionario=cuestionario, preguntas=preguntas_lista)
+    except Exception:
+        conexion.close()
         return redirect("/cuestionarios")
 
 # ==========================================
-# RUTAS RESTANTES DE CONTROL
+# SECCIÓN VIDEOS (TIPO YOUTUBE - ¡MÁXIMA ESTABILIDAD!)
 # ==========================================
-@app.route("/comunidad")
-def comunidad():
-    if "usuario" not in session:
-        return redirect("/login")
-    return render_template("comunidad.html")
-
-@app.route("/favoritos")
-def favoritos():
-    if "usuario" not in session:
-        return redirect("/login")
-    return render_template("favoritos.html")
-
-# ==========================================
-# SECCIÓN VIDEOS RECOMENDADOS (TIPO YOUTUBE)
-# ==========================================
-@app.route("/reels")  # Mantenemos la ruta /reels para no cambiar tus menús
+@app.route("/reels")
 def reels():
     if "usuario" not in session:
         return redirect("/login")
-        
     conexion = conectar_bd()
     cursor = conexion.cursor()
-    # Traemos los datos de los videos guardados
     cursor.execute("SELECT id, titulo, url, usuario, fecha FROM reels ORDER BY id DESC")
     lista_videos = cursor.fetchall()
     conexion.close()
@@ -451,32 +377,23 @@ def subir_reel():
         return redirect("/login")
         
     if request.method == "POST":
-        # Ahora capturamos directamente el Texto del formulario, ¡sin archivos pesados!
         titulo = request.form.get("titulo")
-        url_externa = request.form.get("url")  # El link de YouTube/Drive
-        descripcion = request.form.get("descripcion", "Sin descripción") # Usamos descripción en lugar de autor
+        url_externa = request.form.get("url")
+        descripcion = request.form.get("descripcion", "Sin descripción")
         
         if titulo and url_externa:
             try:
                 conexion = conectar_bd()
                 cursor = conexion.cursor()
-                
-                # Aprovechamos la columna 'usuario' o la fecha de la tabla actual para guardar la descripción temporalmente si no quieres alterar columnas, 
-                # o mejor aún, guardamos la descripción en el campo "usuario" de la tabla para no complicarnos con SQL.
                 cursor.execute("""
                     INSERT INTO reels (titulo, url, usuario, fecha)
                     VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
                 """, (titulo, url_externa, descripcion))
-                
-                conexion.commit()
+                conexion.commit() # 🔥 Guarda el link educativo para siempre
                 conexion.close()
                 return redirect("/reels")
             except Exception as e:
-                print(f"Error en la Base de Datos al guardar video: {e}")
-                return f"Error al guardar en la base de datos: {e}", 500
-        else:
-            return "Por favor, rellena todos los campos.", 400
-        
+                return f"Error al guardar video: {e}", 500
     return render_template("subir_reel.html")
     
 @app.route("/logout")
