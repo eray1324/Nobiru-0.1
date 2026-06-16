@@ -2,54 +2,28 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reels Educativos - NOBIRU</title>
+    <title>Reels - NOBIRU</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="modo-oscuro">
-    <div class="contenedor-dashboard">
-        <div class="sidebar">
-            <h1>NOBIRU</h1>
-            <a href="/dashboard">Inicio</a>
-            <a href="/biblioteca">Biblioteca</a>
-            <a href="/comunidad">Comunidad</a>
-            <a href="/cuestionarios">Cuestionarios</a>
-            <a href="/reels" class="activo">Reels</a>
-            <a href="/favoritos">Mis Favoritos</a>
-            <a href="/logout">Cerrar Sesión</a>
+<body class="modo-oscuro" style="background: #0f172a; color: white; font-family: sans-serif;">
+    <div class="contenedor" style="max-width: 500px; margin: 0 auto; padding: 20px;">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h1>Reels Educativos</h1>
+            <a href="/subir-reel" style="background: #7b2cff; color: white; text-decoration: none; padding: 10px 15px; border-radius: 5px; font-weight: bold;">+ Subir</a>
+        </div>
+
+        <div class="feed-reels">
+            {% for reel in reels %}
+            <div class="card-reel" style="background: #16233c; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+                <h3>{{ reel[1] }}</h3> <video src="{{ reel[2] }}" controls style="width: 100%; max-height: 400px; border-radius: 8px; background: black;"></video>
+                <p style="color: #8b94aa; font-size: 12px; margin-top: 8px;">Subido por: @{{ reel[3] }}</p>
+            </div>
+            {% else %}
+            <p style="color: #8b94aa; text-align: center;">No hay reels compartidos aún. ¡Sé el primero!</p>
+            {% endfor %}
         </div>
         
-        <div class="contenido">
-            <h2>Reels Educativos</h2>
-            
-            <div class="card">
-                <h3>Publicar un nuevo Video Corto</h3>
-                <form method="POST" enctype="multipart/form-data">
-                    <input type="text" name="titulo" placeholder="Título del Reel" required><br><br>
-                    <select name="categoria" required>
-                        <option value="Matemáticas">Matemáticas</option>
-                        <option value="Historia">Historia</option>
-                        <option value="Ciencias">Ciencias</option>
-                        <option value="Español">Español</option>
-                    </select><br><br>
-                    <input type="file" name="video" accept="video/*" required><br><br>
-                    <button type="submit" class="btn-primario">Subir Reel</button>
-                </form>
-            </div>
-            
-            <div class="grid-reels">
-                {% for reel in reels %}
-                    <div class="card-video">
-                        <h4>{{ reel[1] }}</h4>
-                        <span class="tag">{{ reel[3] }}</span>
-                        <video width="100%" controls>
-                            <source src="{{ reel[2] }}" type="video/mp4">
-                            Tu navegador no soporta reproducción de videos.
-                        </video>
-                        <p style="font-size: 12px; color: #aaa;">Subido por: @{{ reel[4] }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
     </div>
 </body>
 </html>
