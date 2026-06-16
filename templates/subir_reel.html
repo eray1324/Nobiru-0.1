@@ -2,31 +2,36 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Subir Reel - NOBIRU</title>
+    <title>Recomendar Video - NOBIRU</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="modo-oscuro" style="background: #0f172a; color: white; font-family: sans-serif;">
-    <div class="contenedor" style="max-width: 500px; margin: 50px auto; padding: 20px;">
+<body class="modo-oscuro" style="background: #0f172a; color: white; font-family: sans-serif; padding: 20px;">
+    <div style="max-width: 500px; margin: 40px auto;">
+        <a href="/reels" style="color: #8b94aa; text-decoration: none;">← Volver a Videos</a>
         
-        <a href="/reels" style="color: #8b94aa; text-decoration: none;">← Volver</a>
-        <h2 style="margin-top: 15px;">Compartir Nuevo Reel</h2>
+        <h1 style="color: #38bdf8; margin-top: 20px;">Recomendar un Video</h1>
+        <p style="color: #94a3b8;">Comparte un enlace de YouTube, Khan Academy o cualquier plataforma educativa.</p>
 
-        <form action="/subir-reel" method="POST" enctype="multipart/form-data" style="background: #16233c; padding: 20px; border-radius: 10px; margin-top: 20px;">
+        <form action="/subir-reel" method="POST" style="background: #16233c; padding: 20px; border-radius: 10px; margin-top: 20px;">
             <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: #8b94aa;">Título del reel</label>
-                <input type="text" name="titulo" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 5px; color: white; box-sizing: border-box;">
+                <label style="display: block; margin-bottom: 5px;">Título del Video:</label>
+                <input type="text" name="titulo" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #233554; color: white; border-radius: 5px;">
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px;">Enlace / URL (YouTube, etc):</label>
+                <input type="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #233554; color: white; border-radius: 5px;">
             </div>
 
             <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; color: #8b94aa;">Selecciona tu Video (MP4)</label>
-                <input type="file" name="video" accept="video/*" required style="color: white;">
+                <label style="display: block; margin-bottom: 5px;">¿De qué trata? (Descripción corta):</label>
+                <textarea name="descripcion" rows="3" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #233554; color: white; border-radius: 5px; resize: none;"></textarea>
             </div>
 
-            <button type="submit" style="width: 100%; background: #7b2cff; color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer;">
-                🚀 Compartir Video Público
+            <button type="submit" style="width: 100%; background: #00b894; color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                Publicar Video
             </button>
         </form>
-
     </div>
 </body>
 </html>
