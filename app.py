@@ -7,105 +7,40 @@ import os
 import cloudinary
 import cloudinary.uploader
 
-# 1. Inicialización de la app
+# 1. Configuración Inicial
 app = Flask(__name__)
 app.secret_key = "nobiru_secret_key"
+app.permanent_session_lifetime = timedelta(days=60)
 
-# 2. Configuración unificada de Cloudinary
+# Configuración Cloudinary
 cloudinary.config(
     cloud_name="Root",
     api_key="974437519682479",
     api_secret="gpl_ojcbZcjzLO9jFa2AqWdzMrU"
 )
 
-app.permanent_session_lifetime = timedelta(days=60)
-
+# Configuración de carpetas
 UPLOAD_FOLDER = "static/uploads/pdfs"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-# 3. Conexión segura a la Base de Datos
+# 2. Conexión y Creación de Tablas
 def conectar_bd():
     return psycopg2.connect(os.environ.get("DATABASE_URL"))
 
-# 4. Creación limpia de las tablas
 def crear_bd():
     conexion = conectar_bd()
     cursor = conexion.cursor()
     
+    # Crear tablas si no existen
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS usuarios(
-        id SERIAL PRIMARY KEY,
-        email TEXT NOT NULL,
-        username TEXT UNIQUE NOT NULL,
-        password TEXT NOT NULL,
-        recordar INTEGER DEFAULT 0
-    )
-    """)
-    
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS materiales(
-        id SERIAL PRIMARY KEY,
-        titulo TEXT NOT NULL,
-        descripcion TEXT,
-        autor TEXT,
-        fecha TEXT,
-        archivo TEXT,
-        usuario TEXT,
-        descargas INTEGER DEFAULT 0
-    )
-    """)
-    
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS cuestionarios(
-        id SERIAL PRIMARY KEY,
-        titulo TEXT NOT NULL,
-        descripcion TEXT,
-        creador TEXT,
-        fecha TEXT
-    )
-    """)
-    
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS preguntas(
-        id SERIAL PRIMARY KEY,
-        cuestionario_id INTEGER REFERENCES cuestionarios(id) ON DELETE CASCADE,
-        pregunta_texto TEXT NOT NULL,
-        opcion_a TEXT NOT NULL,
-        opcion_b TEXT NOT NULL,
-        opcion_c TEXT NOT NULL,
-        opcion_d TEXT NOT NULL,
-        correcta TEXT NOT NULL
-    )
-    """)
-    
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS respuestas_usuarios(
-        id SERIAL PRIMARY KEY,
-        usuario TEXT NOT NULL,
-        cuestionario_id INTEGER REFERENCES cuestionarios(id) ON DELETE CASCADE,
-        puntaje INTEGER NOT NULL,
-        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS reels (
-        id SERIAL PRIMARY KEY,
-        titulo TEXT NOT NULL,
-        url TEXT NOT NULL,
-        usuario TEXT NOT NULL,
-        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-    """)
-
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS comunidad(
-        id SERIAL PRIMARY KEY,
-        usuario TEXT NOT NULL,
-        comentario TEXT NOT NULL,
-        fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
+    CREATE TABLE IF NOT EXISTS usuarios(id SERIAL PRIMARY KEY, email TEXT, username TEXT UNIQUE, password TEXT, recordar INTEGER);
+    CREATE TABLE IF NOT EXISTS materiales(id SERIAL PRIMARY KEY, titulo TEXT, descripcion TEXT, autor TEXT, fecha TEXT, archivo TEXT, usuario TEXT, descargas INTEGER DEFAULT 0);
+    CREATE TABLE IF NOT EXISTS cuestionarios(id SERIAL PRIMARY KEY, titulo TEXT, descripcion TEXT, creador TEXT, fecha TEXT);
+    CREATE TABLE IF NOT EXISTS preguntas(id SERIAL PRIMARY KEY, cuestionario_id INTEGER REFERENCES cuestionarios(id) ON DELETE CASCADE, pregunta_texto TEXT, opcion_a TEXT, opcion_b TEXT, opcion_c TEXT, opcion_d TEXT, correcta TEXT);
+    CREATE TABLE IF NOT EXISTS respuestas_usuarios(id SERIAL PRIMARY KEY, usuario TEXT, cuestionario_id INTEGER REFERENCES cuestionarios(id) ON DELETE CASCADE, puntaje INTEGER, fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+    CREATE TABLE IF NOT EXISTS reels(id SERIAL PRIMARY KEY, titulo TEXT, url TEXT, usuario TEXT, fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+    CREATE TABLE IF NOT EXISTS comunidad(id SERIAL PRIMARY KEY, usuario TEXT, comentario TEXT, fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
     """)
     
     conexion.commit()
@@ -113,107 +48,36 @@ def crear_bd():
 
 crear_bd()
 
-# ==========================================
-# RUTAS DE AUTENTICACIÓN
-# ==========================================
-
+# 3. Rutas de Autenticación
 @app.route("/")
-def inicio():
-    return render_template("splash.html")
-
-@app.route("/verificar")
-def verificar():
-    if "usuario" in session:
-        return redirect("/dashboard")
-    return redirect("/login")
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        email = request.form["email"]
-        username = request.form["username"]
-        password = request.form["password"]
-        password_cifrada = generate_password_hash(password)
-        recordar = 1 if "recordar" in request.form else 0
-        
-        conexion = conectar_bd()
-        cursor = conexion.cursor()
-        try:
-            cursor.execute("""
-                INSERT INTO usuarios (email, username, password, recordar)
-                VALUES (%s, %s, %s, %s)
-            """, (email, username, password_cifrada, recordar))
-            conexion.commit()
-            conexion.close()
-            return redirect("/login")
-        except Exception:
-            conexion.close()
-            return "Ese nombre de usuario ya existe."
-    return render_template("register.html")
+def inicio(): return render_template("splash.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
-        
         conexion = conectar_bd()
         cursor = conexion.cursor()
         cursor.execute("SELECT * FROM usuarios WHERE username = %s", (username,))
         usuario = cursor.fetchone()
         conexion.close()
-        
         if usuario and check_password_hash(usuario[3], password):
-            session.permanent = "recordar" in request.form
             session["usuario"] = username
             return redirect("/dashboard")
-        else:
-            return "Usuario o contraseña incorrectos."
+        return "Usuario o contraseña incorrectos."
     return render_template("login.html")
 
-# ==========================================
-# DASHBOARD
-# ==========================================
+# 4. Dashboard
 @app.route("/dashboard")
 def dashboard():
-    if "usuario" not in session:
-        return redirect("/login")
-        
-    username = session["usuario"]
-    conexion = conectar_bd()
-    cursor = conexion.cursor()
-    
-    cursor.execute("SELECT COUNT(*) FROM respuestas_usuarios WHERE usuario = %s", (username,))
-    cuestionarios_completados = cursor.fetchone()[0]
-    
-    cursor.execute("SELECT COUNT(*) FROM materiales WHERE usuario = %s", (username,))
-    documentos_compartidos = cursor.fetchone()[0]
-    conexion.close()
-    
-    frase_hoy = "El aprendizaje es un tesoro que seguirá a su dueño a todas partes."
-    
-    if cuestionarios_completados >= 10:
-        rango, emoji, estilo_css = "Oro", "🏅", "background: #f1c40f; color: #2c3e50;"
-    elif cuestionarios_completados >= 5:
-        rango, emoji, estilo_css = "Plata", "🥈", "background: #7f8c8d; color: #fff;"
-    else:
-        rango, emoji, estilo_css = "Bronce", "🥉", "background: #8c5233; color: #fff;"
+    if "usuario" not in session: return redirect("/login")
+    return render_template("dashboard.html", usuario=session["usuario"])
 
-    return render_template(
-        "dashboard.html",
-        usuario=username, frase=frase_hoy,
-        cuestionarios_completados=cuestionarios_completados,
-        documentos_compartidos=documentos_compartidos,
-        rango=rango, emoji=emoji, estilo_css=estilo_css
-    )
-
-# ==========================================
-# SECCIÓN BIBLIOTECA (SUBIDA CORREGIDA)
-# ==========================================
+# 5. Biblioteca
 @app.route("/biblioteca")
 def biblioteca():
-    if "usuario" not in session:
-        return redirect("/login")
+    if "usuario" not in session: return redirect("/login")
     conexion = conectar_bd()
     cursor = conexion.cursor()
     cursor.execute("SELECT * FROM materiales ORDER BY id DESC")
@@ -223,228 +87,67 @@ def biblioteca():
 
 @app.route("/subir-material", methods=["GET", "POST"])
 def subir_material():
-    if "usuario" not in session:
-        return redirect("/login")
-        
+    if "usuario" not in session: return redirect("/login")
     if request.method == "POST":
-        titulo = request.form.get("titulo")
-        descripcion = request.form.get("descripcion")
-        autor = request.form.get("autor")
-        fecha = request.form.get("fecha")
-        archivo_pdf = request.files.get("archivo")
+        titulo, desc, autor, fecha = request.form["titulo"], request.form["descripcion"], request.form["autor"], request.form["fecha"]
+        archivo = request.files.get("archivo")
         url_pdf = ""
-        
-        if archivo_pdf and archivo_pdf.filename != "":
-            try:
-                # Intentar subir a Cloudinary de forma segura
-                resultado = cloudinary.uploader.upload(archivo_pdf, resource_type="raw")
-                url_pdf = resultado.get("secure_url")
-            except Exception as e:
-                print(f"Error Cloudinary: {e}")
-                # Si falla Cloudinary, lo guardamos local de respaldo para que no se trabe tu entrega
-                filename = secure_filename(archivo_pdf.filename)
-                archivo_pdf.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-                url_pdf = f"/static/uploads/pdfs/{filename}"
-                
-        try:
-            conexion = conectar_bd()
-            cursor = conexion.cursor()
-            cursor.execute("""
-                INSERT INTO materiales (titulo, descripcion, autor, fecha, archivo, usuario)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """, (titulo, descripcion, autor, fecha, url_pdf, session["usuario"]))
-            conexion.commit()
-            conexion.close()
-            return redirect("/biblioteca")
-        except Exception as e:
-            print(f"Error BD Materiales: {e}")
-            return f"Error al guardar material en la base de datos: {e}", 500
-        
-    return render_template("subir_material.html")
-
-# ==========================================
-# CUESTIONARIOS Y EVALUACIONES
-# ==========================================
-@app.route("/cuestionarios")
-def cuestionarios():
-    if "usuario" not in session:
-        return redirect("/login")
-    conexion = conectar_bd()
-    cursor = conexion.cursor()
-    cursor.execute("SELECT id, titulo, creador, fecha FROM cuestionarios ORDER BY id DESC")
-    lista_cuestionarios = cursor.fetchall()
-    conexion.close()
-    return render_template("cuestionarios.html", cuestionarios=lista_cuestionarios)
-
-@app.route("/crear-cuestionario", methods=["GET", "POST"])
-def crear_cuestionario():
-    if "usuario" not in session:
-        return redirect("/login")
-        
-    if request.method == "POST":
-        titulo = request.form["titulo"]
-        descripcion = request.form["descripcion"]
-        creador = session["usuario"]
-        fecha_actual = datetime.now().strftime("%Y-%m-%d")
+        if archivo:
+            res = cloudinary.uploader.upload(archivo, resource_type="raw")
+            url_pdf = res["secure_url"]
         
         conexion = conectar_bd()
         cursor = conexion.cursor()
-        
-        cursor.execute("""
-            INSERT INTO cuestionarios (titulo, descripcion, creador, fecha)
-            VALUES (%s, %s, %s, %s) RETURNING id
-        """, (titulo, descripcion, creador, fecha_actual))
-        cuestionario_id = cursor.fetchone()[0]
-        
-        preguntas_texto = request.form.getlist("pregunta_texto[]")
-        opciones_a = request.form.getlist("opcion_a[]")
-        opciones_b = request.form.getlist("opcion_b[]")
-        opciones_c = request.form.getlist("opcion_c[]")
-        opciones_d = request.form.getlist("opcion_d[]")
-        correctas = request.form.getlist("correcta[]")
-        
-        for i in range(len(preguntas_texto)):
-            cursor.execute("""
-                INSERT INTO preguntas (cuestionario_id, pregunta_texto, opcion_a, opcion_b, opcion_c, opcion_d, correcta)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-            """, (cuestionario_id, preguntas_texto[i], opciones_a[i], opciones_b[i], opciones_c[i], opciones_d[i], correctas[i]))
-            
+        cursor.execute("INSERT INTO materiales (titulo, descripcion, autor, fecha, archivo, usuario) VALUES (%s, %s, %s, %s, %s, %s)",
+                       (titulo, desc, autor, fecha, url_pdf, session["usuario"]))
         conexion.commit()
         conexion.close()
-        return redirect("/cuestionarios")
-    return render_template("crear_cuestionario.html")
+        return redirect("/biblioteca")
+    return render_template("subir_material.html")
 
-@app.route("/responder-cuestionario/<int:cuestionario_id>", methods=["GET", "POST"])
-def responder_cuestionario(cuestionario_id):
-    if "usuario" not in session:
-        return redirect("/login")
-        
-    conexion = conectar_bd()
-    cursor = conexion.cursor()
-    
-    if request.method == "POST":
-        try:
-            cursor.execute("SELECT id, correcta FROM preguntas WHERE cuestionario_id = %s", (cuestionario_id,))
-            preguntas_db = cursor.fetchall()
-            
-            total_preguntas = len(preguntas_db)
-            aciertos = 0
-            
-            for preg in preguntas_db:
-                p_id, correcta = preg
-                respuesta_alumno = request.form.get(f"pregunta_{p_id}")
-                if respuesta_alumno == correcta:
-                    aciertos += 1
-            
-            errores = total_preguntas - aciertos
-            puntuacion = int((aciertos / total_preguntas) * 100) if total_preguntas > 0 else 0
-                
-            cursor.execute("""
-                INSERT INTO respuestas_usuarios (usuario, cuestionario_id, puntaje)
-                VALUES (%s, %s, %s)
-            """, (session["usuario"], cuestionario_id, puntuacion))
-            conexion.commit()
-            conexion.close()
-            
-            return render_template(
-                "resultado_quiz.html", 
-                puntuacion=puntuacion, aciertos=aciertos, errores=errores
-            )
-        except Exception as e:
-            conexion.close()
-            return redirect("/cuestionarios")
-        
-    # GET
-    try:
-        cursor.execute("SELECT id, titulo, descripcion FROM cuestionarios WHERE id = %s", (cuestionario_id,))
-        cuestionario = cursor.fetchone()
-        
-        cursor.execute("""
-            SELECT id, pregunta_texto, opcion_a, opcion_b, opcion_c, opcion_d 
-            FROM preguntas WHERE cuestionario_id = %s ORDER BY id ASC
-        """, (cuestionario_id,))
-        preguntas_lista = cursor.fetchall()
-        conexion.close()
-        
-        return render_template("responder_quiz.html", cuestionario=cuestionario, preguntas=preguntas_lista)
-    except Exception:
-        conexion.close()
-        return redirect("/cuestionarios")
-
-# ==========================================
-# SECCIÓN VIDEOS (REELS ORIGINALES O YOUTUBE)
-# ==========================================
+# 6. Reels
 @app.route("/reels")
 def reels():
-    if "usuario" not in session:
-        return redirect("/login")
+    if "usuario" not in session: return redirect("/login")
     conexion = conectar_bd()
     cursor = conexion.cursor()
-    cursor.execute("SELECT id, titulo, url, usuario, fecha FROM reels ORDER BY id DESC")
-    lista_videos = cursor.fetchall()
+    cursor.execute("SELECT * FROM reels ORDER BY id DESC")
+    lista = cursor.fetchall()
     conexion.close()
-    return render_template("reels.html", reels=lista_videos)
+    return render_template("reels.html", reels=lista)
 
-@app.route("/subir-reel", methods=["GET", "POST"])
+@app.route("/subir-reel", methods=["POST"])
 def subir_reel():
-    if "usuario" not in session:
-        return redirect("/login")
-        
-    if request.method == "POST":
-        titulo = request.form.get("titulo")
-        url_externa = request.form.get("url")
-        descripcion = request.form.get("descripcion", "Sin descripción")
-        
-        if titulo and url_externa:
-            try:
-                conexion = conectar_bd()
-                cursor = conexion.cursor()
-                cursor.execute("""
-                    INSERT INTO reels (titulo, url, usuario, fecha)
-                    VALUES (%s, %s, %s, CURRENT_TIMESTAMP)
-                """, (titulo, url_externa, descripcion))
-                conexion.commit()
-                conexion.close()
-                return redirect("/reels")
-            except Exception as e:
-                return f"Error al guardar video: {e}", 500
-    return render_template("subir_reel.html")
+    if "usuario" not in session: return redirect("/login")
+    titulo, url = request.form["titulo"], request.form["url"]
+    conexion = conectar_bd()
+    cursor = conexion.cursor()
+    cursor.execute("INSERT INTO reels (titulo, url, usuario) VALUES (%s, %s, %s)", (titulo, url, session["usuario"]))
+    conexion.commit()
+    conexion.close()
+    return redirect("/reels")
 
-# ==========================================
-# SECCIÓN COMUNIDAD
-# ==========================================
+# 7. Comunidad
 @app.route("/comunidad", methods=["GET", "POST"])
 def comunidad():
-    if "usuario" not in session:
-        return redirect("/login")
-        
+    if "usuario" not in session: return redirect("/login")
     conexion = conectar_bd()
     cursor = conexion.cursor()
-    
     if request.method == "POST":
-        comentario = request.form.get("comentario")
-        if comentario:
-            cursor.execute("""
-                INSERT INTO comunidad (usuario, comentario)
-                VALUES (%s, %s)
-            """, (session["usuario"], comentario))
-            conexion.commit()
-            
+        comentario = request.form["comentario"]
+        cursor.execute("INSERT INTO comunidad (usuario, comentario) VALUES (%s, %s)", (session["usuario"], comentario))
+        conexion.commit()
     cursor.execute("SELECT usuario, comentario, fecha FROM comunidad ORDER BY id DESC")
-    lista_comentarios = cursor.fetchall()
+    lista = cursor.fetchall()
     conexion.close()
-    
-    return render_template("comunidad.html", comentarios=lista_comentarios)
+    return render_template("comunidad.html", comentarios=lista)
 
-# ==========================================
-# SECCIÓN FAVORITOS (RESTAURADA)
-# ==========================================
+# 8. Favoritos
 @app.route("/favoritos")
 def favoritos():
-    if "usuario" not in session:
-        return redirect("/login")
+    if "usuario" not in session: return redirect("/login")
     return render_template("favoritos.html")
-    
+
 @app.route("/logout")
 def logout():
     session.clear()
