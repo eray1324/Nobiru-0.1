@@ -2,105 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subir Reel - NOBIRU</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body class="modo-oscuro" style="background-color: #0f172a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: white; margin: 0; padding: 0;">
-
-    <div class="contenedor" style="max-width: 600px; margin: 40px auto; padding: 20px; box-sizing: border-box;">
+<body class="modo-oscuro" style="background: #0f172a; color: white; font-family: sans-serif;">
+    <div class="contenedor" style="max-width: 500px; margin: 50px auto; padding: 20px;">
         
-        <div class="encabezado" style="margin-bottom: 30px;">
-            <a href="/reels" style="color: #8b94aa; text-decoration: none; font-size: 16px; display: inline-flex; align-items: center; gap: 5px; transition: color 0.2s;">
-                ← Volver a Reels
-            </a>
-            <h1 style="color: white; margin-top: 15px; font-size: 28px; font-weight: 700;">Compartir un Reel</h1>
-            <p style="color: #8b94aa; margin-top: 5px; font-size: 14px;">Sube un video corto educativo para inspirar a la comunidad.</p>
-        </div>
+        <a href="/reels" style="color: #8b94aa; text-decoration: none;">← Volver</a>
+        <h2 style="margin-top: 15px;">Compartir Nuevo Reel</h2>
 
-        <form action="/subir-reel" method="POST" enctype="multipart/form-data" id="form-reels" onsubmit="mostrarCargando()">
-            
-            <div class="card" style="background: #16233c; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid #233554;">
-                
-                <div style="margin-bottom: 25px;">
-                    <label style="color: #cbd5e1; display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px;">Título del Video</label>
-                    <input type="text" name="titulo" placeholder="Ej. Truco rápido de derivadas de 30 segundos" required 
-                           style="width: 100%; padding: 14px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: white; font-size: 15px; box-sizing: border-box; outline: none; transition: border-color 0.2s;">
-                </div>
-
-                <div style="margin-bottom: 30px;">
-                    <label style="color: #cbd5e1; display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px;">Archivo de Video (MP4, MOV)</label>
-                    
-                    <div style="position: relative; border: 2px dashed #475569; padding: 30px 20px; border-radius: 12px; text-align: center; background: #0f172a; cursor: pointer; transition: border-color 0.2s;" 
-                         id="dropzone" onclick="document.getElementById('video-input').click()">
-                        
-                        <span style="font-size: 40px; display: block; margin-bottom: 10px;">🎬</span>
-                        <p id="texto-archivo" style="margin: 0; color: #94a3b8; font-size: 14px;">Haga clic aquí para buscar tu video</p>
-                        
-                        <input type="file" name="video" id="video-input" accept="video/*" required accept="video/mp4,video/quicktime"
-                               style="display: none;" onchange="previsualizarVideo(event)">
-                    </div>
-
-                    <div id="vista-previa-contenedor" style="display: none; margin-top: 20px; text-align: center;">
-                        <p style="color: #4cd137; font-size: 13px; margin-bottom: 10px;">✔ Archivo seleccionado correctamente</p>
-                        <video id="video-preview" controls style="max-width: 100%; max-height: 250px; border-radius: 8px; background: black;"></video>
-                    </div>
-                </div>
-
-                <div id="estado-cargando" style="display: none; text-align: center; margin-bottom: 20px; padding: 15px; background: #1e293b; border-radius: 10px;">
-                    <span style="display: inline-block; animation: spin 1s linear infinite; font-size: 20px; margin-bottom: 5px;">🔄</span>
-                    <p style="margin: 0; color: #38bdf8; font-size: 14px; font-weight: bold;">Subiendo y optimizando el video... Por favor, espera.</p>
-                </div>
-
-                <button type="submit" class="btn-primario" id="btn-compartir"
-                        style="width: 100%; padding: 14px; background: linear-gradient(135deg, #7b2cff, #571cd4); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; transition: transform 0.2s, background 0.2s; box-shadow: 0 4px 15px rgba(123, 44, 255, 0.4);">
-                    🚀 Compartir Video Público
-                </button>
-
+        <form action="/subir-reel" method="POST" enctype="multipart/form-data" style="background: #16233c; padding: 20px; border-radius: 10px; margin-top: 20px;">
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: #8b94aa;">Título del reel</label>
+                <input type="text" name="titulo" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 5px; color: white; box-sizing: border-box;">
             </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; color: #8b94aa;">Selecciona tu Video (MP4)</label>
+                <input type="file" name="video" accept="video/*" required style="color: white;">
+            </div>
+
+            <button type="submit" style="width: 100%; background: #7b2cff; color: white; border: none; padding: 12px; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                🚀 Compartir Video Público
+            </button>
         </form>
+
     </div>
-
-    <script>
-        // Función para mostrar la vista previa del video en tiempo real antes de subirlo
-        function previsualizarVideo(event) {
-            const input = event.target;
-            const contenedor = document.getElementById('vista-previa-contenedor');
-            const video = document.getElementById('video-preview');
-            const texto = document.getElementById('texto-archivo');
-            const dropzone = document.getElementById('dropzone');
-
-            if (input.files && input.files[0]) {
-                const archivo = input.files[0];
-                
-                // Actualizar el texto informativo
-                texto.innerText = archivo.name + " (" + (archivo.size / (1024 * 1024)).toFixed(2) + " MB)";
-                dropzone.style.borderColor = "#7b2cff";
-
-                // Crear URL temporal local para reproducir en la etiqueta <video>
-                const urlObjeto = URL.createObjectURL(archivo);
-                video.src = urlObjeto;
-                contenedor.style.display = 'block';
-            }
-        }
-
-        // Previene confusiones del usuario avisando que la carga está en progreso
-        function mostrarCargando() {
-            document.getElementById('estado-cargando').style.display = 'block';
-            document.getElementById('btn-compartir').style.disabled = true;
-            document.getElementById('btn-compartir').style.background = '#475569';
-            document.getElementById('btn-compartir').innerText = 'Subiendo...';
-        }
-    </script>
-
-    <style>
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        input:focus {
-            border-color: #7b2cff !important;
-        }
-    </style>
 </body>
 </html>
