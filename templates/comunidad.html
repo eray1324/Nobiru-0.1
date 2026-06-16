@@ -3,16 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <title>Comunidad - NOBIRU</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-
-<h1>👥 Comunidad</h1>
-
-<p>Aquí aparecerán los comentarios de NOBIRU.</p>
-
-<a href="/dashboard">
-    <button>Volver al Dashboard</button>
-</a>
-
+<body class="modo-oscuro">
+    <div class="contenedor-dashboard">
+        <div class="sidebar">
+            <h1>NOBIRU</h1>
+            <a href="/dashboard">Inicio</a>
+            <a href="/biblioteca">Biblioteca</a>
+            <a href="/comunidad" class="activo">Comunidad</a>
+            <a href="/cuestionarios">Cuestionarios</a>
+            <a href="/reels">Reels</a>
+            <a href="/favoritos">Mis Favoritos</a>
+            <a href="/logout">Cerrar Sesión</a>
+        </div>
+        
+        <div class="contenido">
+            <h2>Comunidad de Aprendizaje</h2>
+            
+            <div class="card">
+                <h3>¿Tienes alguna duda de tus estudios?</h3>
+                <form method="POST">
+                    <input type="hidden" name="tipo" value="pregunta">
+                    <textarea name="contenido" placeholder="Escribe tu pregunta aquí..." required></textarea>
+                    <button type="submit" class="btn-primario">Publicar Pregunta</button>
+                </form>
+            </div>
+            
+            <h2>Preguntas de la comunidad</h2>
+            {% for preg in preguntas %}
+                <div class="card-material">
+                    <h4>@{{ preg[1] }} preguntó:</h4>
+                    <p class="texto-pregunta">{{ preg[2] }}</p>
+                    
+                    <div class="respuestas-caja">
+                        <h5>Respuestas:</h5>
+                        {% for resp in respuestas %}
+                            {% if resp[4] == preg[0] %}
+                                <div class="respuesta-item">
+                                    <strong>@{{ resp[1] }}:</strong> {{ resp[2] }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    
+                    <form method="POST" class="form-respuesta">
+                        <input type="hidden" name="tipo" value="respuesta">
+                        <input type="hidden" name="referencia_id" value="{{ preg[0] }}">
+                        <input type="text" name="contenido" placeholder="Escribe tu respuesta..." required>
+                        <button type="submit" class="btn-secundario">Responder</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 </body>
 </html>
