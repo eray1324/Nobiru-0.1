@@ -372,7 +372,7 @@ def responder_cuestionario(cuestionario_id):
             
             # Renderiza tu archivo existente con los datos calculados
             return render_template(
-                "responder_quiz.html", 
+                "resultado_quiz.html", 
                 puntuacion=puntuacion, 
                 aciertos=aciertos, 
                 errores=errores
