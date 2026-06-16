@@ -389,15 +389,16 @@ def favoritos():
         return redirect("/login")
     return render_template("favoritos.html")
 
+# ==========================================
+# RUTAS DE REELS (Ván ÚNICAMENTE en app.py)
+# ==========================================
 @app.route("/reels")
 def reels():
     if "usuario" not in session:
         return redirect("/login")
-        return render_template("reels.html")
         
     conexion = conectar_bd()
     cursor = conexion.cursor()
-    # Obtenemos todos los videos guardados en la BD para mostrarlos en el feed público
     cursor.execute("SELECT * FROM reels ORDER BY id DESC")
     lista_reels = cursor.fetchall()
     conexion.close()
