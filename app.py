@@ -413,8 +413,7 @@ def subir_reel():
         url_video = ""
         
         if archivo_video:
-            # Aquí es donde ocurre el cambio: resource_type="video" le indica a Cloudinary 
-            # que procese y optimice un archivo multimedia pesado
+            # resource_type="video" es vital para Cloudinary
             resultado = cloudinary.uploader.upload(archivo_video, resource_type="video")
             url_video = resultado["secure_url"]
             
