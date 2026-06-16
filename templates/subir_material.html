@@ -1,76 +1,62 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
     <meta charset="UTF-8">
-    <title>Compartir material - NOBIRU</title>
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
-
+    <title>Compartir Material - NOBIRU</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-
-<body>
-
-<h1>Compartir material</h1>
-
-<form method="POST" enctype="multipart/form-data">
-
-    <input
-        type="text"
-        name="titulo"
-        placeholder="Título del material"
-        required>
-
-    <br><br>
-
-    <input
-        type="text"
-        name="descripcion"
-        placeholder="Descripción">
-
-    <br><br>
-
-    <input
-        type="text"
-        name="autor"
-        placeholder="Autor">
-
-    <br><br>
-
-    <input
-        type="date"
-        name="fecha">
-
-    <br><br>
-
-    <input
-        type="file"
-        name="archivo"
-        accept=".pdf"
-        required>
-
-    <br><br>
-
-    <button type="submit">
-
-        Compartir material
-
-    </button>
-
-</form>
-
-<br>
-
-<a href="/biblioteca">
-
-    <button>
-
-        ← Volver a Biblioteca
-
-    </button>
-
-</a>
-
+<body class="modo-oscuro">
+    <div class="contenedor-dashboard">
+        
+        <div class="sidebar">
+            <h1>NOBIRU</h1>
+            <a href="/dashboard">Inicio</a>
+            <a href="/biblioteca" class="activo">Biblioteca</a>
+            <a href="/comunidad">Comunidad</a>
+            <a href="/cuestionarios">Cuestionarios</a>
+            <a href="/reels">Reels Educativos</a>
+            <a href="/favoritos">Favoritos</a>
+            <a href="/logout">Cerrar sesión</a>
+        </div>
+        
+        <div class="contenido">
+            <div class="encabezado" style="margin-bottom: 20px;">
+                <h2>📤 Compartir nuevo recurso educativo</h2>
+            </div>
+            <p style="margin-bottom: 30px;">Sube un archivo PDF de estudio para que toda la comunidad pueda aprender de él.</p>
+            
+            <div class="card" style="max-width: 600px; background: #16233c;">
+                <form method="POST" enctype="multipart/form-data">
+                    
+                    <label style="font-weight: 500; color: #FFD700;">Título del material *</label>
+                    <textarea name="titulo" rows="1" placeholder="Ej: Introducción a Python" required style="resize: none; height: 50px;"></textarea>
+                    
+                    <label style="font-weight: 500; color: #FFD700;">Breve descripción</label>
+                    <textarea name="descripcion" rows="3" placeholder="¿De qué trata este documento?"></textarea>
+                    
+                    <div style="display: flex; gap: 20px;">
+                        <div style="flex: 1;">
+                            <label style="font-weight: 500; color: #FFD700;">Autor del documento</label>
+                            <textarea name="autor" rows="1" placeholder="Ej: Guido van Rossum" style="resize: none; height: 50px;"></textarea>
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-weight: 500; color: #FFD700;">Fecha de publicación</label>
+                            <input type="date" name="fecha" style="width: 100%; padding: 12px; margin: 15px 0; background: #1c2a49; border: 1px solid #7b2cff; color: white; border-radius: 15px;">
+                        </div>
+                    </div>
+                    
+                    <label style="font-weight: 500; color: #FFD700; display: block; margin-top: 15px;">Selecciona el archivo PDF *</label>
+                    <div style="background: #1c2a49; border: 2px dashed #7b2cff; padding: 20px; border-radius: 15px; text-align: center; margin: 15px 0;">
+                        <input type="file" name="archivo" accept=".pdf" required style="color: white; font-family: 'Poppins', sans-serif;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; margin-top: 30px;">
+                        <button type="submit" class="btn-primario" style="flex: 1;">🚀 Publicar en Biblioteca</button>
+                        <a href="/biblioteca" style="text-decoration: none; flex: 1;"><button type="button" class="btn-secundario" style="width: 100%;">❌ Cancelar</button></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
