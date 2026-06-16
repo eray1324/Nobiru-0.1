@@ -3,16 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <title>Cuestionarios - NOBIRU</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
-
-<h1>📚 Cuestionarios</h1>
-
-<p>Aquí aparecerán los cuestionarios de NOBIRU.</p>
-
-<a href="/dashboard">
-    <button>Volver al Dashboard</button>
-</a>
-
+<body class="modo-oscuro">
+    <div class="contenedor-dashboard">
+        <div class="sidebar">
+            <h1>NOBIRU</h1>
+            <a href="/dashboard">Inicio</a>
+            <a href="/biblioteca">Biblioteca</a>
+            <a href="/comunidad">Comunidad</a>
+            <a href="/cuestionarios" class="activo">Cuestionarios</a>
+            <a href="/reels">Reels</a>
+            <a href="/favoritos">Mis Favoritos</a>
+            <a href="/logout">Cerrar Sesión</a>
+        </div>
+        
+        <div class="contenido">
+            <h2>Ponte a prueba - Quiz de Demostración</h2>
+            <form method="POST" class="quiz-form">
+                {% for q in preguntas %}
+                    <div class="card">
+                        <h3>{{ loop.index }}. {{ q.p }}</h3>
+                        <label>
+                            <input type="radio" name="pregunta_{{ q.id }}" value="a" required> A) {{ q.a }}
+                        </label><br>
+                        <label>
+                            <input type="radio" name="pregunta_{{ q.id }}" value="b"> B) {{ q.b }}
+                        </label><br>
+                        <label>
+                            <input type="radio" name="pregunta_{{ q.id }}" value="c"> C) {{ q.c }}
+                        </label>
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn-enviar-quiz">Terminar Cuestionario</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
