@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados del Quiz - NOBIRU</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="modo-oscuro">
+    <div class="contenedor" style="text-align: center; max-width: 600px; margin: 50px auto;">
+        <h1>Resultados del Evaluación</h1>
+        <div class="card">
+            <h2>Tu Puntuación: <span style="color: #FFD700;">{{ puntuacion }} / 100</span></h2>
+            <p style="color: #4cd137;">✔ Aciertos: {{ aciertos }}</p>
+            <p style="color: #e84118;">✖ Errores: {{ errores }}</p>
+            
+            <hr>
+            <h3>Tu Insignia Obtenida</h3>
+            {% if puntuacion >= 90 %}
+                <div class="badge oro">🏅 ORO</div>
+                <p>"¡Felicidades! Has alcanzado la insignia de Oro por tu excelente desempeño."</p>
+            {% elif puntuacion >= 60 %}
+                <div class="badge plata">🥈 PLATA</div>
+                <p>"Buen trabajo, obtuviste la insignia de Plata. Sigue intentándolo para alcanzar el Oro!"</p>
+            {% else %}
+                <div class="badge bronce">🥉 BRONCE</div>
+                <p>"Has obtenido la insignia de Bronce. No te rindas, vuelve a repasar tus apuntes!"</p>
+            {% endif %}
+            
+            <br>
+            <a href="/dashboard"><button class="btn-primario">Volver al Inicio</button></a>
+        </div>
+    </div>
+</body>
+</html>
